@@ -1,8 +1,8 @@
-# Ano, Tara?
+# Eventhub
 
-**Ano, Tara?** is a web-based Event Management System that allows administrators to create and manage events while enabling users to register, reserve slots, and check in digitally.
+**Eventhub** is a web-based Event Management System that allows administrators to create and manage events while enabling users to register, reserve slots, and check in digitally.
 
-Developed as an academic project, **Ano, Tara?** aims to provide a modern, responsive, and streamlined event management experience.
+Developed as an academic project, **Eventhub** aims to provide a modern, responsive, and streamlined event management experience.
 
 ---
 
