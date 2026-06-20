@@ -2,31 +2,50 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Models\Event;
+use App\Models\EventAttendance;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasUuids;
+
+    protected $table = 'users';
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Disable auto-incrementing since we are using Supabase UUIDs
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+    public $incrementing = false;
+
+    /**
+     * Set the primary key type to string.
+     */
+    protected $keyType = 'string';
+
+    protected $fillable = [
+        'id', // Required to insert the Supabase UUID
+        'username',
+        'first_name',
+        'last_name',
+        'email',
+        'contact_number',
+        'country',
+        'region',
+        'city',
+        'role',
+        'profile_image'
+    ];
+
+    public function getFullNameAttribute() {
+        return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
+    }
+    
+    public function events() {
+        return $this->hasMany(Event::class, 'user_id');
+    }
+
+    public function eventAttendances() {
+        return $this->hasMany(EventAttendance::class, 'user_id');
     }
 }
