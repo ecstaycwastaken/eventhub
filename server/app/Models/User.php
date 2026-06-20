@@ -33,7 +33,8 @@ class User extends Authenticatable
         'country',
         'region',
         'city',
-        'role'
+        'role',
+        'profile_image'
     ];
 
     public function getFullNameAttribute() {
