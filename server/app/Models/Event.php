@@ -48,4 +48,14 @@ class Event extends Model
     public function eventAttendances() {
         return $this->hasMany(EventAttendance::class, 'event_id');
     }
+
+    public function getEventHost() {
+        $host_id = $this->eventAttendances()->where('status', 'host')->value('user_id');
+        $user = User::find($host_id);
+        return $user ? $user->full_name : null;
+    }
+
+    public function isHost(string $user_id) {
+        return $this->eventAttendances()->where('user_id', $user_id)->where('status', 'host')->exists();
+    }
 }
