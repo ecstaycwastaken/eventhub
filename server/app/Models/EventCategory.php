@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Models\Event;
 
 class EventCategory extends Model
 {
+    use HasUuids;
+    
     protected $table = 'event_categories';
 
     /**

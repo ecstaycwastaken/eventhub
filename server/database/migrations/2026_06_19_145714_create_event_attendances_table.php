@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUuid('event_id')->constrained('events')->cascadeOnDelete();
             $table->primary(['user_id', 'event_id']);
-            $table->enum('status', ['registered', 'attended'])->default('maybe');
+            $table->enum('status', ['registered', 'attended', 'host']);
             $table->string('code')->unique();
             $table->timestamps();
         });

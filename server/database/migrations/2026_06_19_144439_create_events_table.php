@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->dateTime('date');
-            $table->string('location');
+            $table->string('venue');
             $table->integer('capacity');
             $table->decimal('price', 10, 2);
             $table->string('banner_image')->nullable();

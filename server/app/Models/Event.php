@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Models\User;
 use App\Models\EventCategory;
 use App\Models\EventAttendance;
 
 class Event extends Model
 {
+    use HasUuids;
+    
     protected $table = 'events';
 
     /**
@@ -28,7 +31,7 @@ class Event extends Model
         'title',
         'description',
         'date',
-        'location',
+        'venue',
         'capacity',
         'price',
         'banner_image'
