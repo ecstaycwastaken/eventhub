@@ -1,8 +1,8 @@
 import React from 'react'
 
-// Page routing is handled here
+// Page routes are handled here
 
-function App() {
+const App = () => {
   return (
     <div>App</div>
   )
