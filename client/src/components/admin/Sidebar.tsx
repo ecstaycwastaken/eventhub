@@ -21,6 +21,7 @@ function Sidebar({ collapsed }: SidebarProps) {
         <SidebarLink path="#" icon={FaCalendar} label="Events" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaUser} label="Users" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaUserCheck} label="Attendances" collapsed={collapsed} />
+        <SidebarLink path="#" icon={FaTags} label="Categories" collapsed={collapsed} />
       </nav>
     </aside>
   )
