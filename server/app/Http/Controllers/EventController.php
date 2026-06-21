@@ -224,6 +224,32 @@ class EventController extends Controller
         }
     }
 
+    public function searchEvents(Request $request) {
+        try {
+            $query = $request->query('q', '');
+
+            // Search for events by title or description
+            $events = Event::where('title', 'ilike', "%{$query}%")
+                ->orWhere('description', 'ilike', "%{$query}%")
+                ->with('category')
+                ->get();
+
+            $categories = $events->groupBy('category.name')->map(function ($group) {
+                return $group->count();
+            });
+
+            return response()->json([
+                'hasEvents' => !$events->isEmpty(),
+                'events' => $events,
+                'total_events' => $events->count(),
+                'categories' => $categories
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error searching events: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to search events.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getAllEvents(Request $request) {
         try {
             // Filter events
@@ -233,14 +259,19 @@ class EventController extends Controller
             $events = Event::with('category')
                 ->when($query, function ($q) use ($query) {
                     $q->whereHas('category', function ($relationshipQuery) use ($query) {
-                        $relationshipQuery->where('name', 'like', "%{$query}%");
+                        $relationshipQuery->where('name', 'ilike', "%{$query}%");
                     });
                 })->get();
+            
+            $categories = $events->groupBy('category.name')->map(function ($group) {
+                return $group->count();
+            });
 
             return response()->json([
                 'hasEvents' => !$events->isEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
+                'categories' => $categories
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching events: ' . $e->getMessage());
