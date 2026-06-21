@@ -4,7 +4,7 @@ import Button from '../../components/Button'
 import EventCard from '../../components/EventCard'
 import type { EventItem } from '../../components/EventCard'
 
-const HomePage = () => {
+const LandingPage = () => {
   const [events, setEvents] = useState<EventItem[]>([])
   const totalEvents = events.length
   const totalCategories = new Set(
@@ -136,4 +136,4 @@ const HomePage = () => {
   )
 }
 
-export default HomePage
+export default LandingPage

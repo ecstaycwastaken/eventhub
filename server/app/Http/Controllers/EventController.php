@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Event;
 use App\Models\EventAttendance;
 
@@ -28,6 +29,28 @@ class EventController extends Controller
             ]);
 
             $user = $request->user();
+            $bannerUrl = null;
+
+            if ($request->hasFile('banner_image') && $request->file('banner_image')->isValid()) {
+                $file = $request->file('banner_image');
+                
+                // Generate a unique filename for the banner image
+                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                try {
+                    Storage::disk('supabase')->putFileAs(
+                        '', // Path inside the bucket root
+                        $file,
+                        $fileName,
+                        'public'
+                    );
+
+                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
+                } catch (\Exception $e) {
+                    Log::error('Error uploading banner image: ' . $e->getMessage());
+                    return response()->json(['message' => 'Failed to upload banner image.', 'error' => $e->getMessage()], 500);
+                }
+            }
 
             // Create the event using the validated data
             $event = Event::create([
@@ -39,6 +62,7 @@ class EventController extends Controller
                 'category_id' => $request->category,
                 'capacity' => $request->capacity,
                 'price' => $request->price,
+                'banner_image' => $bannerUrl
             ]);
 
             // Create a new event attendance record for the event creator
@@ -84,8 +108,37 @@ class EventController extends Controller
                 'price' => 'sometimes|required|numeric',
             ]);
 
+            $bannerUrl = $event->banner_image;
+
+            if ($request->hasFile('banner_image') && $request->file('banner_image')->isValid()) {
+                $file = $request->file('banner_image');
+                
+                // Generate a unique filename for the banner image
+                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                try {
+                    // If there's an existing banner image, delete it
+                    if ($event->banner_image) {
+                        $existingFileName = basename($event->banner_image);
+                        Storage::disk('supabase')->delete($existingFileName);
+                    }
+
+                    Storage::disk('supabase')->putFileAs(
+                        '', // Path inside the bucket root
+                        $file,
+                        $fileName,
+                        'public'
+                    );
+
+                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
+                } catch (\Exception $e) {
+                    Log::error('Error uploading banner image: ' . $e->getMessage());
+                    return response()->json(['message' => 'Failed to upload banner image.', 'error' => $e->getMessage()], 500);
+                }
+            }
+
             // Update the event with the validated data
-            $event->update($request->only(['title', 'description', 'category', 'date', 'venue', 'capacity', 'price']));
+            $event->update($request->only(['title', 'description', 'category', 'date', 'venue', 'capacity', 'price']) + ['banner_image' => $bannerUrl]);
 
             return response()->json($event);
         } catch (\Exception $e) {
@@ -188,11 +241,16 @@ class EventController extends Controller
 
             // Fetch the events created by the user along with their categories
             $events = Event::where('user_id', $user->id)->with('category')->get();
+            $events->each(function($event) {
+                $event->host_name = $event->getEventHost();
+                $event->attendees_count = $event->eventAttendances()->where('status', 'registered')->count();
+            });
 
             // Return success whether the user has events or not, along with the events data
             return response()->json([
                 'hasEvents' => !$events->isEmpty(),
-                'events' => $events
+                'events' => $events,
+                'total_events' => $events->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events: ' . $e->getMessage());

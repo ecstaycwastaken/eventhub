@@ -9,7 +9,8 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function signup(Request $request) {
+    public function signup(Request $request)
+    {
         try {
             $request->validate([
                 'username' => 'required|string|unique:users',
@@ -84,7 +85,8 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         try {
             $request->validate([
                 'email' => 'required|string|email',
