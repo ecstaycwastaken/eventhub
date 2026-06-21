@@ -33,5 +33,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/{id}', [EventController::class, 'getEventById'])->name('events.details');
         Route::get('/view-pass/{id}', [EventController::class, 'getEventViewPass'])->name('events.view-pass');
         Route::get('/attendance/{id}', [EventController::class, 'getEventAttendance'])->name('events.attendance');
+        Route::get('/my-events/report', [EventController::class, 'getEventsReport'])->name('events.events-report');
+        Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
     });
 });
