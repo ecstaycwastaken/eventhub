@@ -5,10 +5,8 @@ import {
   RouterProvider
 } from "react-router-dom";
 
-import MainLayout from "@/layouts/MainLayout";
-import HomePage from "@/pages/public/HomePage"
 import AdminLayout from "./layouts/AdminLayout";
-import { AdminPage } from "./pages";
+import AdminPage from "./pages/private/AdminPage";
 import AdminEvents from "./pages/private/AdminEvents";
 import AuthGuard from "@/components/auth/AuthGuard"
 import AuthProvider from "@/context/AuthContext";
