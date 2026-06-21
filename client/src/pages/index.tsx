@@ -1,3 +1,3 @@
-export { default as AdminPage } from "./private/AdminPage"
+export { default as AdminPage } from "./private/HomePage"
 
-export { default as HomePage } from "./public/HomePage"
+export { default as HomePage } from "./public/LandingPage"
