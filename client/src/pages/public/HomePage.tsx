@@ -1,8 +1,9 @@
-const HomePage = () => {
+function HomePage() {
+
   return (
-    <section>
-      <div>HomePage</div>
-    </section>
+    <div>
+      HomePage
+    </div>
   )
 }
 
