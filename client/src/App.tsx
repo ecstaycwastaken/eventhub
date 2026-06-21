@@ -7,12 +7,20 @@ import {
 
 import MainLayout from "@/layouts/MainLayout";
 import HomePage from "@/pages/public/HomePage"
+import AdminLayout from "./layouts/AdminLayout";
+import { AdminPage } from "./pages";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='/' element={<MainLayout />}>
-      <Route index element={<HomePage />} />
-    </Route>
+    <>
+      <Route path='/' element={<MainLayout />}>
+        <Route index element={<HomePage />} />
+      </Route>
+
+      <Route path='/admin' element={<AdminLayout />}>
+        <Route index element={<AdminPage />} />
+      </Route>
+    </>
   )
 )
 
