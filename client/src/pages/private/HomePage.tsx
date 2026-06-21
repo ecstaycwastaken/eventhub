@@ -1,8 +1,8 @@
+import React from 'react'
+
 const HomePage = () => {
   return (
-    <section>
-      <div>HomePage</div>
-    </section>
+    <div>HomePage</div>
   )
 }
 
