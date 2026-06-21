@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function () {
 
     Route::group(['prefix' => 'event'], function () {
         Route::get('/', [EventController::class, 'getAllEvents'])->name('events.all');
+        Route::get('/search', [EventController::class, 'searchEvents'])->name('events.search');
     });
 
     // Private routes that require authentication
@@ -28,8 +29,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/check-in', [EventController::class, 'checkInEvent'])->name('events.check-in');
         Route::put('/update/{id}', [EventController::class, 'updateEvent'])->name('events.update');
         Route::delete('/delete/{id}', [EventController::class, 'deleteEvent'])->name('events.delete');
-        Route::get('/{id}', [EventController::class, 'getEventById'])->name('events.details');
         Route::get('/my-events', [EventController::class, 'getMyEvents'])->name('events.my-events');
+        Route::get('/{id}', [EventController::class, 'getEventById'])->name('events.details');
         Route::get('/view-pass/{id}', [EventController::class, 'getEventViewPass'])->name('events.view-pass');
+        Route::get('/attendance/{id}', [EventController::class, 'getEventAttendance'])->name('events.attendance');
+        Route::get('/my-events/report', [EventController::class, 'getEventsReport'])->name('events.events-report');
+        Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
     });
 });
