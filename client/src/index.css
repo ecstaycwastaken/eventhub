@@ -68,15 +68,15 @@
     /* Font Sizes: Buttons */
     --text-button-lg: 1rem;
     --text-button-lg--line-height: 1.5rem;
-    --text-button-lg--font-weight: 700;
+    --text-button-lg--font-weight: 500;
 
     --text-button-md: 0.8rem;
     --text-button-md--line-height: 1.2rem;
-    --text-button-md--font-weight: 700;
+    --text-button-md--font-weight: 500;
 
     --text-button-sm: 0.7rem;
     --text-button-sm--line-height: 0.95rem;
-    --text-button-sm--font-weight: 700;
+    --text-button-sm--font-weight: 500;
 
     /* Colors */
     --color-background: #FFFFFF;
