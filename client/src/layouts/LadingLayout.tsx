@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AuthModal from "@/components/AuthModal";
+import AuthModal from "@/components/auth/AuthModal";
 
-function MainLayout() {
+function LandingLayout() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authTab, setAuthTab] = useState<'signin' | 'signup'>('signin')
 
@@ -31,4 +31,4 @@ function MainLayout() {
   )
 }
 
-export default MainLayout
+export default LandingLayout

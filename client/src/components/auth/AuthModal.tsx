@@ -77,7 +77,9 @@ function AuthModal({ isOpen, onClose, initialTab = 'signin' }: AuthModalProps) {
                 </div>
 
                 <div>
-                    {activeTab === 'signin' ? <SignInForm /> : <SignUpForm />}
+                    {activeTab === 'signin' 
+                    ? <SignInForm onClose={onClose} /> 
+                    : <SignUpForm onSuccess={() => setActiveTab('signin')} />}
                 </div>
            </div>
         </div>

@@ -3,15 +3,61 @@ import Button from "@/components/Button"
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { FaArrowRight } from "react-icons/fa";
 
-function SignUpForm() {
+function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
     const [showPassword, setShowPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev)
+    const togglePasswordVisibility = () => setShowPassword((prev) => !prev)
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setError(null)
+
+        const formData = new FormData(e.currentTarget)
+        const payload = Object.fromEntries(formData.entries())
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/v1/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                if (data.errors) {
+                    const firstError = Object.values(data.errors)[0] as string[]
+                    throw new Error(firstError[0])
+                }
+                throw new Error(data.message || 'Registration failed.')
+            }
+
+            console.log("Registration successful!", data)
+
+            if (onSuccess) onSuccess()
+
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setIsLoading(false)
+        }
     }
     
   return (
-    <form className="flex flex-col gap-3 items-center animate-in fade-in duration-300">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 items-center animate-in fade-in duration-300">
+
+        {error && (
+            <div className="w-full p-3 text-sm text-red-500 border border-red-200 bg-red-50 rounded-xl">
+                {error}
+            </div>
+        )}
+
         <div className="flex gap-5">
             <div className="flex-1">
                 <h1 className="text-caption-3 text-black">USERNAME AND PASSWORD</h1>
@@ -26,13 +72,13 @@ function SignUpForm() {
                     required 
                 />
 
-                <label htmlFor="userPassword" className="text-label text-gray mb-1">PASSWORD</label>
+                <label htmlFor="password" className="text-label text-gray mb-1">PASSWORD</label>
                 <div className="relative w-full mb-5">
                     <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full" 
                         placeholder="Enter your password" 
                         type={showPassword ? 'text' : 'password'}  
-                        name="userPassword"
-                        id="userPassword"
+                        name="password"
+                        id="password"
                         required
                     />
                     <button
@@ -49,24 +95,24 @@ function SignUpForm() {
                     </button>
                 </div>
 
-                <label htmlFor="userPasswordConfirmation" className="text-label text-gray mb-1">RE-TYPE PASSWORD</label>
+                <label htmlFor="password_confirmation" className="text-label text-gray mb-1">RE-TYPE PASSWORD</label>
                 <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full" 
                     placeholder="Re-type your password" 
                     type={showPassword ? 'text' : 'password'}
-                    name="userPasswordConfirmation"
-                    id="userPasswordConfirmation"
+                    name="password_confirmation"
+                    id="password_confirmation"
                     required
                 />
 
                 <h1 className="text-caption-3 text-black mt-5">CONTACT INFORMATION</h1>
                 <hr className="text-gray/50 mb-3" />
 
-                <label htmlFor="userEmail" className="text-label text-gray mb-1">EMAIL ADDRESS</label>
+                <label htmlFor="email" className="text-label text-gray mb-1">EMAIL ADDRESS</label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your email address" 
                     type="email"
-                    name="userEmail"
-                    id="userEmail"
+                    name="email"
+                    id="email"
                     required 
                 />
 
@@ -79,12 +125,12 @@ function SignUpForm() {
                     required 
                 />
 
-                <label htmlFor="mobileNumber" className="text-label text-gray mb-1">MOBILE PHONE</label>
+                <label htmlFor="contact_number" className="text-label text-gray mb-1">MOBILE PHONE</label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your mobile number" 
                     type="text"
-                    name="mobileNumber"
-                    id="mobileNumber"
+                    name="contact_number"
+                    id="contact_number"
                     required 
                 />
 
@@ -115,21 +161,21 @@ function SignUpForm() {
                 <h1 className="text-caption-3 text-black">PERSONAL INFORMATION</h1>
                 <hr className="text-gray/50 mb-3" />
 
-                <label htmlFor="firstName" className="text-label text-gray mb-1">FIRST NAME</label>
+                <label htmlFor="first_name" className="text-label text-gray mb-1">FIRST NAME</label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your first name" 
                     type="text"
-                    name="firstName"
-                    id="firstName"
+                    name="first_name"
+                    id="first_name"
                     required 
                 />
 
-                <label htmlFor="lastName" className="text-label text-gray mb-1">LAST NAME</label>
+                <label htmlFor="last_name" className="text-label text-gray mb-1">LAST NAME</label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your last name" 
                     type="text"
-                    name="lastName"
-                    id="lastName"
+                    name="last_name"
+                    id="last_name"
                     required 
                 />
 
@@ -145,8 +191,13 @@ function SignUpForm() {
             bgColorClass="bg-brand-red"
             className="text-button-md py-3 rounded-xl w-full flex justify-center items-center gap-1"
             type="submit"
+            disabled={isLoading}
         >
-            Create Account <FaArrowRight />
+            {isLoading ? (
+                'Creating Account...' 
+            ) : (
+                <>Create Account <FaArrowRight /></>
+            )}
         </Button>
 
         <p className="text-sub-1 text-gray">
