@@ -224,11 +224,24 @@ class EventController extends Controller
         }
     }
 
-    public function getAllEvents() {
+    public function getAllEvents(Request $request) {
         try {
+            // Filter events
+            $query = $request->query('category', null);
+
             // Fetch all events along with their categories
-            $events = Event::with('category')->get();
-            return response()->json($events);
+            $events = Event::with('category')
+                ->when($query, function ($q) use ($query) {
+                    $q->whereHas('category', function ($relationshipQuery) use ($query) {
+                        $relationshipQuery->where('name', 'like', "%{$query}%");
+                    });
+                })->get();
+
+            return response()->json([
+                'hasEvents' => !$events->isEmpty(),
+                'events' => $events,
+                'total_events' => $events->count(),
+            ]);
         } catch (\Exception $e) {
             Log::error('Error fetching events: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to fetch events.', 'error' => $e->getMessage()], 500);
