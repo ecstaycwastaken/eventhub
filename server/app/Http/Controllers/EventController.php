@@ -314,7 +314,8 @@ class EventController extends Controller
             // Return success whether the user has registered events or not, along with the events data
             return response()->json([
                 'hasRegisteredEvents' => !$events->isEmpty(),
-                'events' => $events
+                'events' => $events,
+                'total_events' => $events->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching registered events: ' . $e->getMessage());
@@ -337,7 +338,7 @@ class EventController extends Controller
 
             // Build QR code data
             $baseUrl = rtrim(env('SERVER_URL'), '/');
-            $qrData = "{$baseUrl}/api/v1/event/check-in?code={$attendance->code}&event_id={$attendance->event_id}&user_id={$attendance->user_id}";   
+            $qrData = "{$baseUrl}/api/v1/event/check-in?code={$attendance->code}&event_id={$attendance->event_id}";
 
             // Return the event pass details (for simplicity, we return the attendance record)
             return response()->json([
@@ -358,7 +359,7 @@ class EventController extends Controller
 
     public function checkInEvent(Request $request) {
         try {
-            // Host will scan the QR code which contains the code, event_id, and user_id as query parameters
+            // Host will scan the QR code which contains the code and event_id as query parameters
             $host = $request->user();
             $event = Event::with('eventAttendances')->findOrFail($request->query('event_id'));
             $isHost = $event->isHost($host->id);
@@ -369,12 +370,10 @@ class EventController extends Controller
 
             $code = $request->query('code');
             $event_id = $request->query('event_id');
-            $attendee_id = $request->query('user_id');
 
-            // Find the event attendance record based on the code, event ID, and user ID
+            // Find the event attendance record based on the code and event ID
             $attendance = EventAttendance::where('code', $code)
                 ->where('event_id', $event_id)
-                ->where('user_id', $attendee_id)
                 ->first();
 
             if (!$attendance) {
@@ -383,13 +382,55 @@ class EventController extends Controller
 
             // Update the attendance status to 'attended'
             EventAttendance::where('event_id', $event_id)
-                ->where('user_id', $attendee_id)
+                ->where('user_id', $attendance->user_id)
                 ->update(['status' => 'attended']);
 
             return response()->json(['message' => 'Attendance updated successfully.']);
         } catch (\Exception $e) {
             Log::error('Error checking in to event: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to check in to event.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getEventAttendance(Request $request, string $id) {
+        try {
+            $user = $request->user();
+            $event = Event::findOrFail($id);
+
+            // Check if the authenticated user is the host of the event
+            $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
+            $authorized = ($attendance && $attendance->isEventHost()) || $user->role === 'admin';
+            if (!$authorized) {
+                return response()->json(['message' => 'Unauthorized. Only the event host or admin can view attendance data.'], 403);
+            }
+
+            // Fetch all attendees for the event along with their attendance status
+            $attendees = EventAttendance::with('user')->where('event_id', $id)->where('status', '<>', 'host')->get();
+            $total_registered = $attendees->where('status', 'registered')->count();
+            $total_attended = $attendees->where('status', 'attended')->count();
+
+            // Build attendees data with user details and attendance status
+            $attendeesData = $attendees->map(function ($attendance) {
+                $checkedInAt = $attendance->status === 'attended' ? $attendance->updated_at : null;
+                return [
+                    'user_id' => $attendance->user_id,
+                    'full_name' => $attendance->user->getFullNameAttribute(),
+                    'status' => $attendance->status,
+                    'code' => $attendance->code,
+                    'checked_in_at' => $checkedInAt,
+                ];
+            });
+
+            return response()->json([
+                'event_id' => $id,
+                'attendees' => $attendeesData,
+                'total_registered' => $total_registered,
+                'total_checked_in' => $total_attended,
+                'total_capacity' => $event->capacity,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching attendance by event: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch attendance data.', 'error' => $e->getMessage()], 500);
         }
     }
 }
