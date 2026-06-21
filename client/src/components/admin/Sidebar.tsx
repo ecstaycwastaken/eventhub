@@ -9,7 +9,7 @@ interface SidebarProps {
 
 function Sidebar({ collapsed }: SidebarProps) {
   return (
-    <aside className={`border-r border-gray-300 h-screen ${collapsed ? "w-16" : "w-64"}`}>
+    <aside className={`fixed left-0 top-0 border-r border-gray-300 h-screen ${collapsed ? "w-16" : "w-64"}`}>
       {!collapsed ? 
       <img className="m-2 h-7" src={logoImg} alt="EventHub Logo" />
       :
@@ -17,8 +17,8 @@ function Sidebar({ collapsed }: SidebarProps) {
       }
 
       <nav className="mt-2">
-        <SidebarLink path="/" icon={FaChartSimple} label="Dashboard" collapsed={collapsed} />
-        <SidebarLink path="#" icon={FaCalendar} label="Events" collapsed={collapsed} />
+        <SidebarLink path="/admin" icon={FaChartSimple} label="Dashboard" collapsed={collapsed} />
+        <SidebarLink path="/admin/events" icon={FaCalendar} label="Events" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaUser} label="Users" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaUserCheck} label="Attendances" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaTags} label="Categories" collapsed={collapsed} />

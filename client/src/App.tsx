@@ -9,6 +9,7 @@ import MainLayout from "@/layouts/MainLayout";
 import HomePage from "@/pages/public/HomePage"
 import AdminLayout from "./layouts/AdminLayout";
 import { AdminPage } from "./pages";
+import AdminEvents from "./pages/private/AdminEvents";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
 
       <Route path='/admin' element={<AdminLayout />}>
         <Route index element={<AdminPage />} />
+        <Route path="events" element={<AdminEvents />} />
       </Route>
     </>
   )
