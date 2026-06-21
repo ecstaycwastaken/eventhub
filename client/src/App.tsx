@@ -1,11 +1,23 @@
-import React from 'react'
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider
+} from "react-router-dom";
 
-// Page routes are handled here
+import MainLayout from "@/layouts/MainLayout";
+import HomePage from "@/pages/public/HomePage"
 
-const App = () => {
-  return (
-    <div>App</div>
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path='/' element={<MainLayout />}>
+      <Route index element={<HomePage />} />
+    </Route>
   )
+)
+
+function App() {
+  return <RouterProvider router={router} />
 }
 
 export default App
