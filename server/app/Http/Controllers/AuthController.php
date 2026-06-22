@@ -50,10 +50,15 @@ class AuthController extends Controller
 
             if ($response->failed()) {
                 Log::error('Supabase signup failed: ' . $response->body());
+                $errorData = $response->json();
+                $errorMessage = $errorData['msg'] ?? 'Unable to complete registration with the authentication server.';
+                if (($errorData['error_code'] ?? '') === 'user_already_exists') {
+                    $errorMessage = 'A user with this email address is already registered.';
+                }
                 return response()->json([
-                    'message' => 'Failed to create user.',
-                    'error' => $response->json()
-                ], 500);
+                    'message' => 'Registration failed.',
+                    'error' => $errorMessage
+                ], $response->status() >= 400 && $response->status() < 500 ? $response->status() : 500);
             }
 
             $supabaseUser = $response->json();
@@ -76,11 +81,13 @@ class AuthController extends Controller
                 'message' => 'Successfully created user!',
                 'user' => $user
             ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Signup error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'An error occurred during signup.',
-                'error' => $e->getMessage()
+                'message' => 'An unexpected error occurred during signup. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
             ], 500);
         }
     }
@@ -104,9 +111,11 @@ class AuthController extends Controller
             ]);
 
             if ($response->failed()) {
+                $errorData = $response->json();
+                $errorMessage = $errorData['error_description'] ?? 'Invalid email or password.';
                 return response()->json([
-                    'message' => 'Invalid credentials.',
-                    'error' => $response->json()
+                    'message' => 'Authentication failed.',
+                    'error' => $errorMessage
                 ], 401);
             }
 
@@ -119,10 +128,13 @@ class AuthController extends Controller
                 'user' => $supabaseUser['user'],
                 'access_token' => $supabaseUser['access_token']
             ], 200)->withCookie($cookie);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage());
             return response()->json([
-                'message' => 'An error occurred during login.',
-                'error' => $e->getMessage()
+                'message' => 'An unexpected error occurred during login. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
             ], 500);
         }
     }
