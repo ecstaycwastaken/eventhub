@@ -49,7 +49,10 @@ class EventController extends Controller
                     $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
                 } catch (\Exception $e) {
                     Log::error('Error uploading banner image: ' . $e->getMessage());
-                    return response()->json(['message' => 'Failed to upload banner image.', 'error' => $e->getMessage()], 500);
+                    return response()->json([
+                        'message' => 'Failed to upload banner image. Please try again.',
+                        'error' => config('app.debug') ? $e->getMessage() : 'Upload failed'
+                    ], 500);
                 }
             }
 
@@ -77,10 +80,16 @@ class EventController extends Controller
             DB::commit(); // Commit the transaction if everything is successful
 
             return response()->json($event, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack(); // Roll back the transaction in case of any errors
             Log::error('Error creating event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to create event.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while creating the event.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -134,7 +143,10 @@ class EventController extends Controller
                     $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
                 } catch (\Exception $e) {
                     Log::error('Error uploading banner image: ' . $e->getMessage());
-                    return response()->json(['message' => 'Failed to upload banner image.', 'error' => $e->getMessage()], 500);
+                    return response()->json([
+                        'message' => 'Failed to upload banner image. Please try again.',
+                        'error' => config('app.debug') ? $e->getMessage() : 'Upload failed'
+                    ], 500);
                 }
             }
 
@@ -142,9 +154,16 @@ class EventController extends Controller
             $event->update($request->only(['title', 'description', 'category', 'date', 'venue', 'capacity', 'price']) + ['banner_image' => $bannerUrl]);
 
             return response()->json($event);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error updating event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to update event.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while updating the event.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -166,9 +185,14 @@ class EventController extends Controller
             $event->delete();
 
             return response()->json(['message' => 'Event deleted successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error deleting event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to delete event.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while deleting the event.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -197,9 +221,14 @@ class EventController extends Controller
             ]);
 
             return response()->json(['message' => 'Successfully registered for the event.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error registering to event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to register for the event.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while registering for the event.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -219,9 +248,14 @@ class EventController extends Controller
             $event->user_status = $eventAttendance ? $eventAttendance->status : 'not_registered';
 
             return response()->json($event);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error fetching event details: ' . $e->getMessage());
-            return response()->json(['message' => "Failed to fetch event details.", 'error'=> $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching event details.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -247,7 +281,10 @@ class EventController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error searching events: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to search events.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while searching events.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -276,7 +313,10 @@ class EventController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching events: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch events.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching events.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -299,7 +339,10 @@ class EventController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch events.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching your events.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -320,7 +363,10 @@ class EventController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching registered events: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch registered events.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching registered events.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -352,9 +398,14 @@ class EventController extends Controller
                     'qr_data' => $qrData
                 ]
             ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error fetching event pass: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch event pass.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching the event pass.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -387,9 +438,14 @@ class EventController extends Controller
                 ->update(['status' => 'attended']);
 
             return response()->json(['message' => 'Attendance updated successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error checking in to event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to check in to event.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred during check-in.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -429,9 +485,14 @@ class EventController extends Controller
                 'total_checked_in' => $total_attended,
                 'total_capacity' => $event->capacity,
             ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error fetching attendance by event: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch attendance data.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching attendance data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -451,7 +512,10 @@ class EventController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events report: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch events report.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching the events report.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 
@@ -500,9 +564,14 @@ class EventController extends Controller
                 'total_capacity' => $event->capacity,
                 'registration_overtime' => $registrationOvertime
             ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Event not found.'], 404);
         } catch (\Exception $e) {
             Log::error('Error fetching event report: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch event report.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching the event report.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
         }
     }
 }
