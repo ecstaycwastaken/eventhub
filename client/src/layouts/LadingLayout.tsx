@@ -6,9 +6,9 @@ import AuthModal from "@/components/auth/AuthModal";
 
 function LandingLayout() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [authTab, setAuthTab] = useState<'signin' | 'signup'>('signin')
+  const [authTab, setAuthTab] = useState<'signin'>('signin')
 
-  const openAuthModal = (tab: 'signin' | 'signup') => {
+  const openAuthModal = (tab: 'signin') => {
     setAuthTab(tab)
     setIsAuthModalOpen(true)
   }
@@ -16,8 +16,7 @@ function LandingLayout() {
   return (
     <>
       <Navbar 
-        onOpenSignIn={() => openAuthModal('signin')} 
-        onOpenSignUp={() => openAuthModal('signup')}
+        onOpenSignIn={() => openAuthModal('signin')}
       />
         <Outlet />
       <Footer />

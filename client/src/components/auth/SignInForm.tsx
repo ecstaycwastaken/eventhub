@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6"
 import Button from "@/components/Button"
 import { useAuth } from "@/context/AuthContext"
@@ -40,6 +41,13 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
             }
 
             login(data.user, data.access_token)
+
+            const firstName = data.user?.username || 'User'
+            toast.success(`Welcome back, ${firstName} !`, {
+                classNames: {
+                    toast:  'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+                }
+            })
             
             if (onClose) onClose()
             
