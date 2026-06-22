@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/auth/AuthModal";
@@ -7,6 +8,11 @@ import AuthModal from "@/components/auth/AuthModal";
 function LandingLayout() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authTab, setAuthTab] = useState<'signin'>('signin')
+  const { isAuthenticated } = useAuth()
+
+  if (isAuthenticated) {
+    return <Navigate to='/home/events' replace />
+  }
 
   const openAuthModal = (tab: 'signin') => {
     setAuthTab(tab)

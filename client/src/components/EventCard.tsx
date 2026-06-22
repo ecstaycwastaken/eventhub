@@ -1,5 +1,6 @@
 import heroBG from '../assets/hero-bg.png'
 import Button from './Button'
+import { FiCalendar, FiGlobe } from 'react-icons/fi'
 
 export interface EventItem {
   id: string
@@ -40,7 +41,7 @@ function EventCard({ event }: EventCardProps) {
   })
 
   return (
-    <div className="overflow-hidden rounded-3xl border bg-white shadow-md">
+    <div className="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-md">
       <div className="relative h-56">
         <img
           src={event.banner_image || heroBG}
@@ -60,15 +61,17 @@ function EventCard({ event }: EventCardProps) {
       <div className="space-y-3 p-5">
         <h3 className="text-xl font-bold">{event.title}</h3>
 
-        <p className="text-gray-500">
-          {formattedDate} • {formattedTime}
+        <p className="flex items-center justify-left gap-2 text-gray-500">
+          <FiCalendar className="w-3.5 h-3.5" /> {formattedDate} • {formattedTime}
         </p>
 
         <p className="font-semibold" style={{ color: event.category.color }}>
           {event.category.name}
         </p>
 
-        <p className="text-gray-500">{event.venue}</p>
+        <p className="flex items-center justify-left gap-2 text-gray-500">
+          <FiGlobe className="w-3.5 h-3.5" /> {event.venue}
+        </p>
 
         <Button
           bgColorClass="bg-blue-600"
