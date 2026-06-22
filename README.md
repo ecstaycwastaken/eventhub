@@ -90,7 +90,7 @@ React + TypeScript Frontend
 # Project Structure
 
 ```txt id="l6r4t8"
-ano-tara/
+eventhub/
 │
 ├── client/    # React + TypeScript + Vite + Tailwind
 └── server/     # Laravel REST API
@@ -103,11 +103,11 @@ ano-tara/
 ## 1. Clone the Repository
 
 ```bash id="0t5m4s"
-git clone https://github.com/your-username/ano-tara.git
+git clone https://github.com/your-username/eventhub.git
 ```
 
 ```bash id="nwb2k4"
-cd ano-tara
+cd eventhub
 ```
 
 ---
