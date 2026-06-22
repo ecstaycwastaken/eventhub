@@ -4,17 +4,21 @@ import {
   createRoutesFromElements,
   RouterProvider
 } from "react-router-dom";
+import { Toaster } from 'sonner';
 
-import AdminLayout from "./layouts/AdminLayout";
-import AdminPage from "./pages/private/AdminPage";
-import AdminEvents from "./pages/private/AdminEvents";
 import AuthGuard from "@/components/auth/AuthGuard"
 import AuthProvider from "@/context/AuthContext";
 
 import LandingLayout from "@/layouts/LadingLayout"
+import AdminLayout from "./layouts/AdminLayout";
+import HomeLayout from "./layouts/HomeLayout";
+
+
 import LandingPage from "@/pages/public/LandingPage"
 
 import HomePage from "@/pages/private/HomePage"
+import AdminPage from "./pages/private/AdminPage";
+import AdminEvents from "./pages/private/AdminEvents";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -31,7 +35,9 @@ const router = createBrowserRouter(
 
       {/* Private Routes */}
       <Route element={<AuthGuard />}>
-        <Route path='/home' element={<HomePage />} />
+        <Route path='/home' element={<HomeLayout />}>
+          <Route index element={<HomePage />} />
+        </Route>
       </Route>
     </>
   )
@@ -41,6 +47,14 @@ function App() {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+
+      <Toaster 
+        position="top-right"
+        duration={3000}
+        closeButton
+        dir="ltr"
+        richColors
+      />
     </AuthProvider>
   )
 }
