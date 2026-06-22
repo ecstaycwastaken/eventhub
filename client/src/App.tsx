@@ -15,7 +15,6 @@ import HomeLayout from "./layouts/HomeLayout";
 
 
 import LandingPage from "@/pages/public/LandingPage"
-import TestPage from "@/pages/public/TestPage"
 
 import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"

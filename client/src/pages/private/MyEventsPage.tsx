@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiImage, FiCalendar, FiClock, FiMapPin, FiGlobe } from "react-icons/fi"
+import { FiImage, FiCalendar, FiClock, FiMapPin } from "react-icons/fi"
 import { FaArrowRight } from "react-icons/fa6"
 import Button from "@/components/Button"
 import EventCard, { type EventItem } from "@/components/EventCard";
@@ -278,7 +278,7 @@ function MyEventsPage() {
 
             <aside className="w-full lg:w-[32%] sticky top-6 bg-white border border-[#E5E7EB] rounded-xl p-6 shadow-sm">
                 <p className="text-gray text-sub-1 mb-5">EVENT PREVIEW</p>
-                
+
                 <div className="pointer-events-none mb-6">
                     <EventCard event={previewEvent} />
                 </div>
