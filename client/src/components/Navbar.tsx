@@ -11,8 +11,8 @@ interface NavbarProps {
 const Navbar = ({ onOpenSignIn }: NavbarProps) => {
   const { isAuthenticated, user } = useAuth()
 
-  const firstName = user?.username || 'User';
-  const initial = firstName.charAt(0).toUpperCase()
+  const displayName = user?.username || user?.first_name || 'User';
+  const initial = displayName.charAt(0).toUpperCase()
 
   return (
     <nav className='border-b border-b-foreground bg-background sticky top-0 z-50'>
@@ -64,7 +64,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
                     {initial}
                   </div>
                   <span className="text-sm font-medium text-gray-800">
-                    {firstName}
+                    {displayName}
                   </span>
                   <FaChevronDown className="text-gray-400 text-xs ml-1" />
               </div>
