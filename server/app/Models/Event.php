@@ -80,18 +80,4 @@ class Event extends Model
     public function getAttendees() {
         return $this::with('eventAttendances.user')->get();
     }
-
-    public function getRegistrationsByEvent() {
-        $events = $this->withCount(['eventAttendances as registrations_count' => function($query) {
-            $query->where('status', 'registered')->orWhere('status', 'attended');
-        }])->get();
-
-        return $events->map(function($event) {
-            return [
-                'event_id' => $event->id,
-                'title' => $event->title,
-                'registrations_count' => $event->registrations_count
-            ];
-        });
-    }
 }

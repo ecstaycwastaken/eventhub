@@ -496,19 +496,51 @@ class EventController extends Controller
         }
     }
 
-    // TODO: Add more detailed reporting features based on UI adjustments and requirements
     public function getEventsReport(Request $request) {
         try {
             $user = $request->user();
 
-            $event = new Event();
-            $events = $event->getMyHostedEvents($user->id)->load('category');
-            $registrationsReport = $event->getRegistrationsByEvent();
+            // Fetch the events hosted by the user along with their categories and registration counts
+            $events = Event::whereHas('eventAttendances', function($query) use ($user) {
+                    $query->where('user_id', $user->id)->where('status', 'host');
+                })
+                ->with('category')
+                ->withCount(['eventAttendances as registrations_count' => function($query) {
+                    $query->where('status', ['registered', 'attended']);
+                }])
+                ->get();
+
+            // Calculate dashboard KPIs
+            $totalEvents = $events->count();
+            $totalRegistrations = $events->sum('registrations_count');
+            $averageRegistrations = $totalEvents > 0 ? round($totalRegistrations / $totalEvents, 2) : 0;
+
+
+            // Attendance rate calculation
+            $eventIds = $events->pluck('id');
+
+            $totalAttended = EventAttendance::whereIn('event_id', $eventIds)
+                ->where('status', 'attended')
+                ->count();
+
+            $attendanceRate = $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100, 2) : 0;
+
+            // Build the registrations report data
+            $registrationsReport = $events->map(function($event) {
+                return [
+                    'event_id' => $event->id,
+                    'title' => $event->title,
+                    'registrations_count' => $event->registrations_count
+                ];
+            });
 
             return response()->json([
                 'events' => $events,
-                'total_events' => $events->count(),
-                'registrations_report' => $registrationsReport
+                'total_events' => $totalEvents,
+                'total_registrations' => $totalRegistrations,
+                'registrations_report' => $registrationsReport,
+                'average_registrations_per_event' => $averageRegistrations,
+                'attendance_rate' => $attendanceRate
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events report: ' . $e->getMessage());
