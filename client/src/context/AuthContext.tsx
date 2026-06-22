@@ -10,19 +10,27 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function AuthProvider({ children }: { children: ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!localStorage.getItem('token'))
-    const [user, setUser] = useState<any | null>(null)
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!localStorage.getItem('token'))
+    const [user, setUser] = useState<any | null>(() => {
+      const savedUser = localStorage.getItem('user')
+      try {
+          return savedUser ? JSON.parse(savedUser) : null
+      } catch (e) {
+          return null
+      }
+    })
 
     const login = (userData: any, token: string) => {
-        localStorage.setItem('token', token);
-        setUser(userData);
-        setIsAuthenticated(true);
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(userData))
+        setUser(userData)
+        setIsAuthenticated(true)
     }
 
     const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-        setIsAuthenticated(false);
+        localStorage.removeItem('token')
+        setUser(null)
+        setIsAuthenticated(false)
     }
 
   return (

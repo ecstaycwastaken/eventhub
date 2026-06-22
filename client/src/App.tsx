@@ -17,6 +17,7 @@ import HomeLayout from "./layouts/HomeLayout";
 import LandingPage from "@/pages/public/LandingPage"
 
 import HomePage from "@/pages/private/HomePage"
+import MyEventsPage from "@/pages/private/MyEventsPage"
 import AdminPage from "./pages/private/AdminPage";
 import AdminEvents from "./pages/private/AdminEvents";
 
@@ -36,7 +37,8 @@ const router = createBrowserRouter(
       {/* Private Routes */}
       <Route element={<AuthGuard />}>
         <Route path='/home' element={<HomeLayout />}>
-          <Route index element={<HomePage />} />
+          <Route path='events' element={<HomePage />} />
+          <Route path='my-events' element={<MyEventsPage />} />
         </Route>
       </Route>
     </>
