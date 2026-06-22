@@ -37,6 +37,9 @@ class Event extends Model
         'banner_image'
     ];
 
+    /**
+     * Relationships
+     */
     public function category() {
         return $this->belongsTo(EventCategory::class, 'category_id');
     }
@@ -49,6 +52,9 @@ class Event extends Model
         return $this->hasMany(EventAttendance::class, 'event_id');
     }
 
+    /**
+     * Helper methods
+     */
     public function getEventHost() {
         $host_id = $this->eventAttendances()->where('status', 'host')->value('user_id');
         $user = User::find($host_id);
@@ -57,5 +63,35 @@ class Event extends Model
 
     public function isHost(string $user_id) {
         return $this->eventAttendances()->where('user_id', $user_id)->where('status', 'host')->exists();
+    }
+
+    public function getMyHostedEvents(string $user_id) {
+        return $this->whereHas('eventAttendances', function($query) use ($user_id) {
+            $query->where('user_id', $user_id)->where('status', 'host');
+        })->get();
+    }
+
+    public function getMyRegisteredEvents(string $user_id) {
+        return $this->whereHas('eventAttendances', function($query) use ($user_id) {
+            $query->where('user_id', $user_id)->where('status', 'registered');
+        })->get();
+    }
+
+    public function getAttendees() {
+        return $this::with('eventAttendances.user')->get();
+    }
+
+    public function getRegistrationsByEvent() {
+        $events = $this->withCount(['eventAttendances as registrations_count' => function($query) {
+            $query->where('status', 'registered')->orWhere('status', 'attended');
+        }])->get();
+
+        return $events->map(function($event) {
+            return [
+                'event_id' => $event->id,
+                'title' => $event->title,
+                'registrations_count' => $event->registrations_count
+            ];
+        });
     }
 }

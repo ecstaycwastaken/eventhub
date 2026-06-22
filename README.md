@@ -90,7 +90,7 @@ React + TypeScript Frontend
 # Project Structure
 
 ```txt id="l6r4t8"
-ano-tara/
+eventhub/
 │
 ├── client/    # React + TypeScript + Vite + Tailwind
 └── server/     # Laravel REST API
@@ -103,11 +103,11 @@ ano-tara/
 ## 1. Clone the Repository
 
 ```bash id="0t5m4s"
-git clone https://github.com/your-username/ano-tara.git
+git clone https://github.com/your-username/eventhub.git
 ```
 
 ```bash id="nwb2k4"
-cd ano-tara
+cd eventhub
 ```
 
 ---
@@ -138,7 +138,26 @@ Make sure both the frontend and backend `.env` files are properly configured bef
 
 ---
 
-## 4. Run the Backend Server
+## 4. Configure PHP configuration file
+
+Make sure to uncomment these PHP extensions inside your `php.ini` file:
+* extension=curl
+* extension=exif
+* extension=fileinfo
+* extension=gd
+* extension=gettext
+* extension=mbstring
+* extension=mysqli
+* extension=openssl
+* extension=pdo_mysql
+* extension=pdo_pgsql
+* extension=pdo_sqlite
+* extension=pgsql
+* extension=zip
+
+---
+
+## 5. Run the Backend Server
 
 Inside the `server` folder:
 
@@ -154,7 +173,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 5. Run the Frontend Server
+## 6. Run the Frontend Server
 
 Inside the `client` folder:
 
