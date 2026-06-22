@@ -20,8 +20,10 @@ const LandingPage = () => {
         if (!res.ok) throw new Error('Failed to fetch events.')
         return res.json()
       })
-      .then((data: EventItem[]) => {
-        setEvents(data)
+      .then((responseData) => {
+        const eventsArray = Array.isArray(responseData) ? responseData : responseData.events
+
+        setEvents(eventsArray || [])
       })
       .catch((err) => {
         setError(err.message)
