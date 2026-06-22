@@ -40,13 +40,13 @@ class EventController extends Controller
 
                 try {
                     Storage::disk('supabase')->putFileAs(
-                        '', // Path inside the bucket root
+                        'event-banners', // Path inside the bucket root
                         $file,
                         $fileName,
                         'public'
                     );
 
-                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
+                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL')) . 'event-banners/' . $fileName;
                 } catch (\Exception $e) {
                     Log::error('Error uploading banner image: ' . $e->getMessage());
                     return response()->json([
@@ -130,17 +130,17 @@ class EventController extends Controller
                     // If there's an existing banner image, delete it
                     if ($event->banner_image) {
                         $existingFileName = basename($event->banner_image);
-                        Storage::disk('supabase')->delete($existingFileName);
+                        Storage::disk('supabase')->delete('event-banners/' . $existingFileName);
                     }
 
                     Storage::disk('supabase')->putFileAs(
-                        '', // Path inside the bucket root
+                        'event-banners/',
                         $file,
                         $fileName,
                         'public'
                     );
 
-                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL'), '/') . '/' . $fileName;
+                    $bannerUrl = rtrim(env('SUPABASE_STORAGE_URL')) . 'event-banners/' . $fileName;
                 } catch (\Exception $e) {
                     Log::error('Error uploading banner image: ' . $e->getMessage());
                     return response()->json([
