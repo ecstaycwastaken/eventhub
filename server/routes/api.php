@@ -14,6 +14,8 @@ Route::prefix('v1')->group(function () {
             'message' => 'Welcome to the EventHub API v1!',
         ]);
     });
+
+    Route::get('/categories', [CategoryController::class, 'getAllCategories'])->name('categories.all');
     
     Route::group(['prefix' => 'auth'], function () {
         // Public auth routes
@@ -62,7 +64,6 @@ Route::prefix('v1')->group(function () {
     // Strictly for admin users
     Route::middleware(['supabase.auth', 'role:admin'])->prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'createCategory'])->name('categories.create');
-        Route::get('/', [CategoryController::class, 'getAllCategories'])->name('categories.read');
         Route::put('/{id}', [CategoryController::class, 'updateCategory'])->name('categories.update');
         Route::delete('/{id}', [CategoryController::class, 'deleteCategory'])->name('categories.delete');
     });
