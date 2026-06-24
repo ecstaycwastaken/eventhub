@@ -22,7 +22,8 @@ export default function AdminEditUserModal({ isOpen, onClose, userId, onSuccess 
     contact_number: '',
     city: '',
     region: '',
-    country: ''
+    country: '',
+    role: 'user'
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -46,7 +47,8 @@ export default function AdminEditUserModal({ isOpen, onClose, userId, onSuccess 
             contact_number: u.contact_number || '',
             city: u.city || '',
             region: u.region || '',
-            country: u.country || ''
+            country: u.country || '',
+            role: u.role || 'user'
           });
           setPreviewImage(u.profile_image || null);
         }
@@ -209,16 +211,31 @@ export default function AdminEditUserModal({ isOpen, onClose, userId, onSuccess 
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact_number" className="text-sm font-medium text-text-secondary">Contact Number</label>
-                <input 
-                  type="text" 
-                  id="contact_number"
-                  name="contact_number"
-                  value={formData.contact_number}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border-strong focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="contact_number" className="text-sm font-medium text-text-secondary">Contact Number</label>
+                  <input 
+                    type="text" 
+                    id="contact_number"
+                    name="contact_number"
+                    value={formData.contact_number}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-strong focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="role" className="text-sm font-medium text-text-secondary">Role</label>
+                  <select 
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange as unknown as React.ChangeEventHandler<HTMLSelectElement>}
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-strong focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
