@@ -36,8 +36,8 @@ const router = createBrowserRouter(
       <Route path='/unauthorized' element={<UnauthorizedPage />} />
 
       {/* Private Routes */}
-      <Route element={<AuthGuard type="user" />}>
-        <Route path='/home' element={<HomeLayout />}>
+      <Route path='/u' element={<AuthGuard type="user" />}>
+        <Route element={<HomeLayout />}>
           <Route path='events' element={<HomePage />} />
           <Route path='my-registrations' element={<MyRegistrationsPage />} />
           <Route path='my-events' element={<MyEventsPage />} />
@@ -46,8 +46,8 @@ const router = createBrowserRouter(
       </Route>
 
       {/* Admin Routes */}
-      <Route element={<AuthGuard type="admin" />}>
-        <Route path='/admin' element={<AdminLayout />}>
+      <Route path='/admin' element={<AuthGuard type="admin" />}>
+        <Route element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
