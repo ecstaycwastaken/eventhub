@@ -23,11 +23,7 @@ import EventFormPage from "@/pages/private/EventFormPage";
 import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
 import MyEventsPage from "@/pages/private/MyEventsPage";
 
-import AdminUsers from "./pages/private/AdminUsers";
-
-import AdminDashboardPage from "./pages/private/admin/DashboardPage";
-import AdminEventsPage from "./pages/private/admin/EventsPage";
-import AttendancesPage from "./pages/private/admin/AttendancesPage";
+import { AdminDashboardPage, AdminEventsPage, AdminUsersPage } from "@/pages/private/admin";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -54,8 +50,7 @@ const router = createBrowserRouter(
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="attendances" element={<AttendancesPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
         </Route>
       </Route>
 
