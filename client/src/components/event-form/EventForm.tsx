@@ -98,6 +98,7 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
     const labels = LABELS[mode];
     const [localError, setLocalError] = useState<string | null>(null);
     const [bannerImage, setBannerImage] = useState<File | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const [formData, setFormData] = useState<EventCreationFormData>(
         () => buildInitialFormData(mode, eventData)
@@ -108,6 +109,29 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
     );
 
     const { sendRequest, loading: isSubmitting, error } = useHttp<EventItem>();
+    const { sendRequest: deleteEvent, loading: isDeleting } = useHttp();
+
+    const handleDelete = async () => {
+        if (!id) return;
+        try {
+            const response = await deleteEvent({
+                method: 'DELETE',
+                url: `/api/v1/event/delete/${id}`
+            });
+            if (response) {
+                toast.success("Event deleted successfully!", {
+                    classNames: {
+                        toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+                    }
+                });
+                setIsDeleteModalOpen(false);
+                onSuccess();
+            }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            toast.error("Failed to delete event. Please try again.");
+        }
+    };
 
     const handleChange = (field: string, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -266,10 +290,21 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
                         </section>
                         
                         <div className="flex flex-col-reverse md:flex-row justify-between items-center border-t border-gray pt-8 mt-4 gap-4">
+                            {mode === 'edit' && (
+                                <Button
+                                    bgColorClass="bg-transparent"
+                                    textColorClass="text-[#E8313A]"
+                                    className="border border-[#E8313A] text-button-md py-3 rounded-xl w-full md:w-auto md:flex-1"
+                                    type="button"
+                                    onClick={() => setIsDeleteModalOpen(true)}
+                                >
+                                    Delete Event
+                                </Button>
+                            )}
                             <Button
                                 bgColorClass="bg-transparent"
                                 textColorClass="text-black"
-                                className="border border-gray text-button-md py-3 rounded-xl w-full md:w-[50%]"
+                                className="border border-gray text-button-md py-3 rounded-xl w-full md:w-auto md:flex-1"
                                 type="button"
                                 onClick={onCancel}
                             >
@@ -277,8 +312,7 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
                             </Button>
                             <Button
                                 bgColorClass="bg-brand-red"
-                                className="flex items-center justify-center gap-2 text-button-md py-3 rounded-xl w-full md:w-[50%]
-                                    disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center gap-2 text-button-md py-3 rounded-xl w-full md:w-auto md:flex-1 disabled:opacity-70 disabled:cursor-not-allowed"
                                 type="submit"
                                 disabled={isSubmitting}
                             >
@@ -296,6 +330,39 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
                     mode={mode}
                 />
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 overflow-y-auto no-scrollbar">
+                    <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl p-6 flex flex-col gap-4 text-center">
+                        <h2 className="text-heading-3 text-black">Delete Event</h2>
+                        <p className="text-body-2 text-gray">
+                            Are you sure you want to delete this event? This action cannot be undone.
+                        </p>
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
+                            <Button 
+                                bgColorClass="bg-transparent" 
+                                textColorClass="text-black" 
+                                className="border border-gray rounded-xl py-2.5 flex-1" 
+                                type="button"
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                bgColorClass="bg-[#E8313A]" 
+                                className="rounded-xl py-2.5 flex-1 disabled:opacity-70 text-white" 
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? "Deleting..." : "Confirm Delete"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
