@@ -23,6 +23,7 @@ import AdminUsers from "./pages/private/AdminUsers";
 
 import AdminDashboardPage from "./pages/private/admin/DashboardPage";
 import AdminEventsPage from "./pages/private/admin/EventsPage";
+import AttendancesPage from "./pages/private/admin/AttendancesPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,6 +33,7 @@ const router = createBrowserRouter(
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="attendances" element={<AttendancesPage />} />
         </Route>
       </Route>
 
