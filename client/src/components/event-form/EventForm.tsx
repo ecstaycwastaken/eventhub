@@ -15,52 +15,99 @@ import type { Category } from '@/types/category';
 import type { EventCreationFormData } from "@/types/event";
 import { FaArrowRight } from "react-icons/fa6";
 
-export interface EditEventFormProps {
-    eventData: EventItem;
+export interface EventFormProps {
+    mode: 'create' | 'edit';
+    /** Required when mode === 'edit' */
+    eventData?: EventItem;
+    /** Required when mode === 'edit' */
+    id?: string;
     fetchedCategories: Category[];
-    id: string;
+    isLoadingCategories?: boolean;
     bannerStyle?: string;
     onCancel: () => void;
     onSuccess: () => void;
 }
 
-function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel, onSuccess }: EditEventFormProps) {
+const LABELS = {
+    create: {
+        heading: 'Create New Event',
+        subheading: 'Fill in the details below to publish your event.',
+        cancelButton: 'Discard',
+        submitButton: 'Publish event',
+        submittingButton: 'Publishing...',
+        successToast: 'Event published successfully!',
+        errorToast: 'Failed to publish event. Please check the form.',
+    },
+    edit: {
+        heading: 'Edit Event',
+        subheading: 'Update the details below to save changes to your event.',
+        cancelButton: 'Cancel',
+        submitButton: 'Save changes',
+        submittingButton: 'Saving changes...',
+        successToast: 'Event updated successfully!',
+        errorToast: 'Failed to update event. Please check the form.',
+    },
+} as const;
+
+function buildInitialFormData(mode: 'create' | 'edit', eventData?: EventItem): EventCreationFormData {
+    if (mode === 'create' || !eventData) {
+        return {
+            title: "",
+            description: "",
+            categoryId: null,
+            eventDate: "",
+            eventTime: "",
+            venue: "",
+            capacity: "",
+            price: "",
+            ticketType: "Free",
+        };
+    }
+
+    let eventDate = "";
+    let eventTime = "";
+
+    if (eventData.date) {
+        const dateObj = new Date(eventData.date);
+        if (!isNaN(dateObj.getTime())) {
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            eventDate = `${yyyy}-${mm}-${dd}`;
+
+            const hh = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            eventTime = `${hh}:${min}`;
+        }
+    }
+
+    return {
+        title: eventData.title || "",
+        description: eventData.description || "",
+        categoryId: eventData.category?.id || eventData.category_id || null,
+        eventDate,
+        eventTime,
+        venue: eventData.venue || "",
+        capacity: eventData.capacity?.toString() || "0",
+        price: eventData.price?.toString() || "0",
+        ticketType: Number(eventData.price) > 0 ? "Paid" : "Free",
+    };
+}
+
+function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories = false, bannerStyle, onCancel, onSuccess }: EventFormProps) {
+    const labels = LABELS[mode];
     const [localError, setLocalError] = useState<string | null>(null);
     const [bannerImage, setBannerImage] = useState<File | null>(null);
 
-    const [formData, setFormData] = useState<EventCreationFormData>(() => {
-        let eventDate = "";
-        let eventTime = "";
-        
-        if (eventData.date) {
-            const dateObj = new Date(eventData.date);
-            if (!isNaN(dateObj.getTime())) {
-                const yyyy = dateObj.getFullYear();
-                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const dd = String(dateObj.getDate()).padStart(2, '0');
-                eventDate = `${yyyy}-${mm}-${dd}`;
-                
-                const hh = String(dateObj.getHours()).padStart(2, '0');
-                const min = String(dateObj.getMinutes()).padStart(2, '0');
-                eventTime = `${hh}:${min}`;
-            }
-        }
+    const [formData, setFormData] = useState<EventCreationFormData>(
+        () => buildInitialFormData(mode, eventData)
+    );
 
-        return {
-            title: eventData.title || "",
-            description: eventData.description || "",
-            categoryId: eventData.category?.id || eventData.category_id || null,
-            eventDate,
-            eventTime,
-            venue: eventData.venue || "",
-            capacity: eventData.capacity?.toString() || "0",
-            price: eventData.price?.toString() || "0",
-            ticketType: Number(eventData.price) > 0 ? "Paid" : "Free"
-        };
-    });
+    const [previewImage, setPreviewImage] = useState<string | null>(
+        mode === 'edit' && eventData?.banner_image ? eventData.banner_image : null
+    );
 
-    const [previewImage, setPreviewImage] = useState<string | null>(eventData.banner_image || null);
-    const { sendRequest: updateEvent, loading: isSubmitting, error } = useHttp<EventItem>();
+    const { sendRequest, loading: isSubmitting, error } = useHttp<EventItem>();
 
     const handleChange = (field: string, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -74,8 +121,8 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
         : new Date().toISOString();
 
     const previewEvent: EventItem = {
-        id: eventData.id || 'preview',
-        user_id: eventData.user_id || 'preview',
+        id: eventData?.id || 'preview',
+        user_id: eventData?.user_id || 'preview',
         category_id: formData.categoryId || '0',
         title: formData.title || 'Your Event Name',
         description: formData.description || 'Preview description',
@@ -84,8 +131,8 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
         capacity: Number(formData.capacity) || 0,
         price: formData.ticketType === "Free" ? 0.0 : (Number(formData.price) || 0),
         banner_image: previewImage || "",
-        created_at: eventData.created_at || new Date().toISOString(),
-        updated_at: eventData.updated_at || new Date().toISOString(),
+        created_at: eventData?.created_at || new Date().toISOString(),
+        updated_at: eventData?.updated_at || new Date().toISOString(),
         category: {
             id: formData.categoryId || '0',
             name: selectedCategory ? selectedCategory.name : 'Category',
@@ -113,9 +160,13 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
         const combinedDateTime = `${formData.eventDate} ${formData.eventTime}`;
 
         const submitData = new FormData();
-        // IMPORTANT: Because we are sending files to a Laravel PUT endpoint,
-        // we must send a POST request with '_method' set to 'PUT'.
-        submitData.append('_method', 'PUT');
+
+        if (mode === 'edit') {
+            // IMPORTANT: Because we are sending files to a Laravel PUT endpoint,
+            // we must send a POST request with '_method' set to 'PUT'.
+            submitData.append('_method', 'PUT');
+        }
+
         submitData.append('title', formData.title);
         submitData.append('description', formData.description);
         submitData.append('category', formData.categoryId);
@@ -128,25 +179,37 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
             submitData.append('banner_image', bannerImage);
         }
         
+        const url = mode === 'create'
+            ? '/api/v1/event/create'
+            : `/api/v1/event/update/${id}`;
+
         try {
-            const response = await updateEvent({
+            const response = await sendRequest({
                 method: 'POST',
-                url: `/api/v1/event/update/${id}`,
+                url,
                 data: submitData
             });
 
             if (response) {
-                toast.success('Event updated successfully!', {
+                toast.success(labels.successToast, {
                     classNames: {
                         toast:  'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
                     }
                 });
+
+                if (mode === 'create') {
+                    setFormData(buildInitialFormData('create'));
+                    setBannerImage(null);
+                    setPreviewImage(null);
+                    (e.target as HTMLFormElement).reset();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
                 
                 onSuccess();
             }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            toast.error("Failed to update event. Please check the form.");
+            toast.error(labels.errorToast);
         }
     }
 
@@ -154,16 +217,16 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
         <div className={`flex flex-col font-dm w-full pb-10 ${bannerStyle || ''}`}>
             <div className="flex flex-col w-full px-12 py-14 bg-linear-to-b from-[#A72C35] to-[#5C171C] rounded-xl">
                 <h1 className="text-white text-heading-1">
-                    Edit Event
+                    {labels.heading}
                 </h1>
                 <p className="text-white/70 text-sub-1">
-                    Update the details below to save changes to your event.
+                    {labels.subheading}
                 </p>
             </div>
 
             <div className="max-w-285 w-full mx-auto px-4 lg:px-10 mt-8 flex flex-col lg:flex-row gap-8 items-start">
                 <main className="w-full lg:w-[65%] bg-white rounded-xl border border-gray shadow-sm p-6 md:p-8">
-                    <form id="edit-event-form" onSubmit={handleSubmit} className="flex flex-col">
+                    <form id="event-form" onSubmit={handleSubmit} className="flex flex-col">
 
                         <ImageUploadField 
                             previewImage={previewImage} 
@@ -174,7 +237,7 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
                             formData={formData} 
                             handleChange={handleChange} 
                             activeCategories={activeCategories} 
-                            isLoadingCategories={false}
+                            isLoadingCategories={isLoadingCategories}
                             error={error}
                             localError={localError}
                         />
@@ -210,7 +273,7 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
                                 type="button"
                                 onClick={onCancel}
                             >
-                                Cancel
+                                {labels.cancelButton}
                             </Button>
                             <Button
                                 bgColorClass="bg-brand-red"
@@ -219,8 +282,8 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
                                 type="submit"
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Saving changes...' : (
-                                    <>Save changes <FaArrowRight /></>
+                                {isSubmitting ? labels.submittingButton : (
+                                    <>{labels.submitButton} <FaArrowRight /></>
                                 )}
                             </Button>
                         </div>
@@ -229,11 +292,12 @@ function EditEventForm({ eventData, fetchedCategories, id, bannerStyle, onCancel
 
                 <PreviewSidebar 
                     previewEvent={previewEvent} 
-                    isSubmitting={isSubmitting} 
+                    isSubmitting={isSubmitting}
+                    mode={mode}
                 />
             </div>
         </div>
     )
 }
 
-export default EditEventForm;
+export default EventForm;

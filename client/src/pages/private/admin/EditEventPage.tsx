@@ -5,7 +5,7 @@ import Button from "@/components/Button";
 import { Spinner } from "@/components/ui/spinner";
 import { type EventItem } from "@/components/event-browser/EventCard";
 import type { Category } from '@/types/category';
-import { EditEventForm } from "@/components/event-form";
+import { EventForm } from "@/components/event-form";
 
 function AdminEditEventPage() {
     const { id } = useParams<{ id: string }>();
@@ -48,7 +48,8 @@ function AdminEditEventPage() {
     }
 
     return (
-        <EditEventForm 
+        <EventForm
+            mode="edit"
             eventData={eventData} 
             fetchedCategories={fetchedCategories || []} 
             id={id!} 
