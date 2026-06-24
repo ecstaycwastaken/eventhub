@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import heroBG from '@/assets/hero-bg.png';
 import Button from '../Button';
+import EventDetailsModal from './EventDetailsModal';
+import { useAuth } from '@/hooks/useAuth';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import type { EventWithCategory } from "@/types/event";
-import EventDetailsModal from './EventDetailsModal';
 
 export type EventItem = EventWithCategory;
 
 interface EventCardProps {
   event: EventWithCategory;
-  currentUserId?: string;
-  isOwned?: boolean;
 }
 
-function EventCard({ event, currentUserId, isOwned }: EventCardProps) {
+function EventCard({ event }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isOwner = currentUserId === event.user_id;
+  const { user } = useAuth();
+  const isOwner = user?.id === event.user_id;
+  const isAdmin = user?.role === 'admin';
 
   const price =
     Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
@@ -43,7 +44,7 @@ function EventCard({ event, currentUserId, isOwned }: EventCardProps) {
             className="h-full w-full object-cover"
           />
 
-          {isOwned ? (
+          {isOwner || isAdmin ? (
             <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text">
               Published
             </div>
@@ -75,7 +76,7 @@ function EventCard({ event, currentUserId, isOwned }: EventCardProps) {
             </p>
 
             <div className="mt-auto pt-2">
-              {isOwner ? (
+              {isOwner || isAdmin ? (
                 <Button
                   bgColorClass="bg-transparent"
                   textColorClass="text-black"
