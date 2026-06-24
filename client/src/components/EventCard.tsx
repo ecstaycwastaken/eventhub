@@ -41,7 +41,7 @@ function EventCard({ event }: EventCardProps) {
   })
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-md">
+    <div className="flex flex-col h-full overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-md">
       <div className="relative h-56">
         <img
           src={event.banner_image || heroBG}
@@ -58,7 +58,7 @@ function EventCard({ event }: EventCardProps) {
         </div>
       </div>
 
-      <div className="space-y-3 p-5">
+      <div className="flex flex-col flex-1 space-y-3 p-5">
         <h3 className="text-xl font-bold">{event.title}</h3>
 
         <p className="flex items-center justify-left gap-2 text-gray-500">
@@ -73,12 +73,14 @@ function EventCard({ event }: EventCardProps) {
           <FiGlobe className="w-3.5 h-3.5" /> {event.venue}
         </p>
 
-        <Button
-          bgColorClass="bg-blue-600"
-          className="w-full rounded-xl py-3 font-semibold"
-        >
-          Request to Join
-        </Button>
+        <div className="mt-auto pt-2">
+            <Button
+              bgColorClass="bg-blue-600"
+              className="w-full rounded-xl py-3 font-semibold"
+            >
+              Request to Join
+            </Button>
+        </div>
       </div>
     </div>
   )
