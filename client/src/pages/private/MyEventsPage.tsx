@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiImage, FiCalendar, FiClock, FiMapPin } from "react-icons/fi"
 import { FaArrowRight } from "react-icons/fa6"
 import Button from "@/components/Button"
-import EventCard, { type EventItem } from "@/components/EventCard";
+import EventCard, { type EventItem } from "@/components/event-browser/EventCard";
 
 function MyEventsPage() {
     const [error, _setError] = useState<string | null>(null)
@@ -42,8 +42,11 @@ function MyEventsPage() {
         date: previewDate,
         venue: venue || 'Venue Location',
         capacity: Number(capacity) || 0,
-        price: ticketType === "Free" ? "0" : (price || "0"),
-        banner_image: null, 
+        price: Number(ticketType === "Free" ? 0 : (price || 0)),
+        banner_image: '', 
+        category_id: String(categoryId || '0'),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         category: {
             id: String(categoryId || '0'),
             name: selectedCategory ? selectedCategory.name : 'Category',
