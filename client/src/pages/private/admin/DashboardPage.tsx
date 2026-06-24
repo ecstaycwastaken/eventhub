@@ -1,10 +1,12 @@
-import StatsSummary from '../../components/admin/StatsSummary';
-import RegistrationVsAttendanceChart from '../../components/admin/RegistrationVsAttendanceChart';
-import EventsByCategoryChart from '../../components/admin/EventsByCategoryChart';
-import RecentEvents from '../../components/admin/RecentEvents';
-import RecentAttendances from '../../components/admin/RecentAttendances';
+import {
+  StatsSummary,
+  RegistrationVsAttendanceChart,
+  EventsByCategoryChart,
+  RecentEvents,
+  RecentAttendances
+} from '@/components/admin';
 
-const AdminPage = () => {
+const DashboardPage = () => {
   return (
     <div className="flex flex-col h-full bg-bg-page w-full max-w-300 mx-auto pb-12">
       <div className="w-full rounded-lg my-6 flex flex-col justify-between items-start">
@@ -33,4 +35,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default DashboardPage;

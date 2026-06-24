@@ -18,15 +18,15 @@ import LandingPage from "@/pages/public/LandingPage"
 
 import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"
-import AdminPage from "./pages/private/AdminPage";
-import AdminEvents from "./pages/private/AdminEvents";
+import AdminDashboardPage from "./pages/private/admin/DashboardPage";
+import AdminEventsPage from "./pages/private/admin/EventsPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path='/admin' element={<AdminLayout />}>
-        <Route index element={<AdminPage />} />
-        <Route path="events" element={<AdminEvents />} />
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="events" element={<AdminEventsPage />} />
       </Route>
 
       {/* Public Routes */}
