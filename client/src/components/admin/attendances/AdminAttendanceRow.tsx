@@ -2,11 +2,12 @@ import { LuHash, LuCheck, LuTrash2 } from "react-icons/lu";
 import Button from "@/components/Button";
 
 export interface AttendanceDetails {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   username: string;
   profile_url: string;
+  event_id: string;
   event_name: string;
   event_category: string;
   event_color: string;
@@ -17,12 +18,17 @@ export interface AttendanceDetails {
 
 interface AdminAttendanceRowProps {
   attendance: AttendanceDetails;
-  onMarkAttended?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onMarkAttended?: (attendance: AttendanceDetails) => void;
+  onDelete?: (id: string) => void;
 }
 
 export default function AdminAttendanceRow({ attendance, onMarkAttended, onDelete }: AdminAttendanceRowProps) {
   const isRegistered = attendance.status === "registered";
+  const formattedDate = new Date(attendance.event_date).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
   const getInitials = (first: string, last: string) => {
     return `${first?.charAt(0) || ""}${last?.charAt(0) || ""}`.toUpperCase() || "U";
@@ -64,7 +70,7 @@ export default function AdminAttendanceRow({ attendance, onMarkAttended, onDelet
             >
               {attendance.event_category}
             </span>
-            <p className="text-xs text-text-secondary">{attendance.event_date}</p>
+            <p className="text-xs text-text-secondary">{formattedDate}</p>
           </div>
         </div>
       </td>
@@ -99,13 +105,13 @@ export default function AdminAttendanceRow({ attendance, onMarkAttended, onDelet
               className="flex gap-1.5 items-center px-3 py-1.5 rounded-lg border border-success-text/30"
               bgColorClass="bg-success-bg"
               textColorClass="text-success-text hover:bg-success/20 transition-colors"
-              onClick={() => onMarkAttended && onMarkAttended(attendance.id)}
+              onClick={() => onMarkAttended && onMarkAttended(attendance)}
             >
               <LuCheck size={14} />
               <span className="text-xs font-semibold">Mark Attended</span>
             </Button> 
           ) : (
-             <div className="w-[124px]"></div> /* Placeholder for alignment */
+             <div className="w-31"></div> /* Placeholder for alignment */
           )}
           <button 
             className="p-2 text-text-secondary hover:text-danger hover:bg-danger/10 rounded-full transition-all"

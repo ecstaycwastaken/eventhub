@@ -36,6 +36,10 @@ Route::prefix('v1')->group(function () {
 
     // Private routes that require authentication
     Route::middleware(['supabase.auth'])->prefix('event')->group(function () {
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/all-events-attendances', [EventController::class, 'getAllEventsAttendances'])->name('events.all-attendance');
+        });
+
         Route::post('/create', [EventController::class, 'createEvent'])->name('events.create');
         Route::post('/register/{id}', [EventController::class, 'registerToEvent'])->name('events.register');
         Route::post('/check-in', [EventController::class, 'checkInEvent'])->name('events.check-in');
@@ -47,6 +51,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/attendance/{id}', [EventController::class, 'getEventAttendance'])->name('events.attendance');
         Route::get('/my-events/report', [EventController::class, 'getEventsReport'])->name('events.events-report');
         Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
+        Route::delete('/attendance/{id}', [EventController::class, 'deleteAttendanceById'])->name('events.delete-attendance');
     });
 
     Route::middleware(['supabase.auth'])->prefix('user')->group(function () {

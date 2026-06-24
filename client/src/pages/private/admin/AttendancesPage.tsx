@@ -1,58 +1,56 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageHeader } from "@/components/admin";
 import { 
   AdminAttendancesFilter, 
   AdminAttendancesTable, 
   type AttendanceDetails 
 } from "@/components/admin/attendances";
+import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 import { LuLibrary, LuEllipsis, LuUserCheck } from "react-icons/lu";
 import { toast } from "sonner";
+import { useHttp } from "@/hooks";
+import type { GetAllEventsAttendanceResponse } from "@/types/response";
 
 function AttendancesPage() {
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [deleteAttendanceId, setDeleteAttendanceId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const [attendances, setAttendances] = useState<AttendanceDetails[]>([
-    {
-      id: 1,
-      first_name: "Karl Joseph",
-      last_name: "Logdat",
-      username: "ctrlaltdel2",
-      profile_url: "https://images.unsplash.com/photo-1780556934041-b92ce1112b45?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      event_name: "Real Event",
-      event_category: "Technology",
-      event_color: "#be123c",
-      event_date: "Mar 30, 2005",
-      status: "attended",
-      code: "SWF-1727"
-    },
-    {
-      id: 2,
-      first_name: "Juan",
-      last_name: "Dela Cruz",
-      username: "jdc_123",
-      profile_url: "https://plus.unsplash.com/premium_photo-1716138192476-f34e85ad43c2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      event_name: "Tunay na event",
-      event_category: "Music",
-      event_color: "#1e3a8a",
-      event_date: "Jan 30, 2027",
-      status: "registered",
-      code: "SWF-0001"
-    },
-    {
-      id: 3,
-      first_name: "Juan",
-      last_name: "Dela Cruz",
-      username: "jdc_123",
-      profile_url: "https://images.unsplash.com/photo-1780995175298-5b1abe9642cc?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      event_name: "Tunay na event",
-      event_category: "Music",
-      event_color: "#1e3a8a",
-      event_date: "Jan 30, 2027",
-      status: "registered",
-      code: "SWF-0002"
-    },
-  ]);
+  const { sendRequest, loading, error } = useHttp<GetAllEventsAttendanceResponse>();
+  const [attendances, setAttendances] = useState<AttendanceDetails[]>([]);
+
+  useEffect(() => {
+    const fetchAttendances = async () => {
+      const response = await sendRequest({
+        method: "GET",
+        url: "/api/v1/event/all-events-attendances",
+      });
+
+      if (response && response.data.events_attendance_data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const flatAttendances: AttendanceDetails[] = response.data.events_attendance_data.flatMap((event: any) => 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          event.attendees.map((a: any) => ({
+            id: a.code, // The backend delete uses the code as the unique identifier
+            first_name: a.first_name || (a.full_name ? a.full_name.split(' ')[0] : ""),
+            last_name: a.last_name || (a.full_name ? a.full_name.split(' ').slice(1).join(' ') : ""),
+            username: a.username || (a.full_name ? a.full_name.replace(/\s/g, '').toLowerCase() : "unknown"),
+            profile_url: a.profile_url || "",
+            event_id: event.event_id,
+            event_name: event.title,
+            event_category: event.category || "General",
+            event_color: event.color || "#6b7280",
+            event_date: event.date,
+            status: a.status,
+            code: a.code,
+          }))
+        );
+        setAttendances(flatAttendances);
+      }
+    };
+    fetchAttendances();
+  }, [sendRequest]);
 
   const filteredAttendances = useMemo(() => {
     let filtered = attendances;
@@ -80,24 +78,54 @@ function AttendancesPage() {
     setSelectedStatus("all");
   }, []);
 
-  const handleMarkAttended = (id: number) => {
-    setAttendances(prev => prev.map(a => 
-      a.id === id ? { ...a, status: "attended" as const } : a
-    ));
-    toast.success("Attendance marked successfully!", {
-      classNames: {
-        toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+  const handleMarkAttended = async (attendance: AttendanceDetails) => {
+    try {
+      const response = await sendRequest({
+        method: "POST",
+        url: `/api/v1/event/check-in?event_id=${attendance.event_id}&code=${attendance.code}`
+      });
+      if (response) {
+        setAttendances(prev => prev.map(a => 
+          a.id === attendance.id ? { ...a, status: "attended" as const } : a
+        ));
+        toast.success("Attendance marked successfully!", {
+          classNames: {
+            toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+          }
+        });
       }
-    });
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Failed to mark attendance.");
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setAttendances(prev => prev.filter(a => a.id !== id));
-    toast.success("Record deleted successfully!", {
-      classNames: {
-        toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+  const handleDeleteClick = (id: string) => {
+    setDeleteAttendanceId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteAttendanceId) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await sendRequest({
+        method: "DELETE",
+        url: `/api/v1/event/attendance/${deleteAttendanceId}`
+      });
+      if (response) {
+        setAttendances(prev => prev.filter(a => a.id !== deleteAttendanceId));
+        toast.success("Record deleted successfully!", {
+          classNames: {
+            toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+          }
+        });
       }
-    });
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Failed to delete record.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteAttendanceId(null);
+    }
   };
 
   const stats = {
@@ -147,12 +175,23 @@ function AttendancesPage() {
 
       <AdminAttendancesTable 
         attendances={filteredAttendances}
+        loading={loading}
+        error={error}
         onClearFilters={handleClearFilters}
         onMarkAttended={handleMarkAttended}
-        onDelete={handleDelete}
+        onDelete={handleDeleteClick}
+      />
+
+      <DeleteConfirmationModal 
+        isOpen={!!deleteAttendanceId}
+        title="Delete Attendance"
+        description="Are you sure you want to delete this attendance record? This action cannot be undone."
+        isDeleting={isDeleting}
+        onCancel={() => setDeleteAttendanceId(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );
 }
 
-export default AttendancesPage;
+export default AttendancesPage;
