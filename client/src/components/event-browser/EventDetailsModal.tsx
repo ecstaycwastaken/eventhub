@@ -19,6 +19,8 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const date = new Date(event.date);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const eventAttendances = event.event_attendances_count || 0;
+    const availableSlots = event.capacity - eventAttendances;
 
     const isFromAdminRoute = location.pathname.startsWith('/admin');
 
@@ -80,18 +82,18 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                         </div>
                         <div className="bg-[#F9FAFB] p-4 rounded-2xl border border-[#F3F4F6] col-span-full">
                             <p className="text-sub-1 font-bold text-gray-500 tracking-wider mb-1">AVAILABLE SLOTS</p>
-                            <p className="font-bold text-[#039855] text-heading-3">300 of {event.capacity}</p>
+                            <p className="font-bold text-[#039855] text-heading-3">{availableSlots} of {event.capacity}</p>
                         </div>
                     </div>
 
                     <div className="mb-7">
                     <div className="flex justify-between text-[12px] text-gray-500 mb-2">
-                        <span>300 / {event.capacity} slots filled</span>
+                        <span>{eventAttendances} / {event.capacity} slots filled</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
                         <div 
                         className="bg-[#039855] h-1.5 rounded-full transition-all duration-500" 
-                        style={{ width: `${30}%` }}
+                        style={{ width: `${(eventAttendances / event.capacity) * 100}%` }}
                         ></div>
                     </div>
                     </div>

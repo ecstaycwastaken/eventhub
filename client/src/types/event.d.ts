@@ -11,6 +11,7 @@ export interface Event {
     capacity: number;
     price: number;
     banner_image: string;
+    event_attendances_count?: number | null;
     created_at: string;
     updated_at: string;
 }

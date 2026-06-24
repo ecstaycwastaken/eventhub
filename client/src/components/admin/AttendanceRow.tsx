@@ -16,7 +16,7 @@ export interface AttendanceDetails {
 };
 
 function AttendanceRow({
-  id, first_name, last_name, username, profile_url, event_name, event_category, 
+  first_name, last_name, username, profile_url, event_name, event_category, 
   event_color, event_date, status, code
 }: AttendanceDetails) {
   return (

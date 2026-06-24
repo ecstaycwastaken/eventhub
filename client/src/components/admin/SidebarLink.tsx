@@ -15,7 +15,10 @@ function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
   // Normalize pathnames by removing trailing slash for consistent matching
   const normalizedPath = path.replace(/\/$/, "");
   const normalizedCurrent = pathname.replace(/\/$/, "");
-  const isActive = path !== '#' && normalizedCurrent === normalizedPath;
+  const isActive = path !== '#' && (
+    normalizedCurrent === normalizedPath || 
+    (normalizedPath !== '/admin' && normalizedCurrent.startsWith(normalizedPath + '/'))
+  );
 
   return (
     <NavLink 
