@@ -37,7 +37,7 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
             updateAuthState(data.user);
 
             const firstName = data.user?.first_name || data.user?.username || 'User';
-            toast.success(`Welcome back, ${firstName} !`, {
+            toast.success(`Welcome back, ${firstName}!`, {
                 classNames: {
                     toast:  'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
                 }
