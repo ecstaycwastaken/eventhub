@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { FaTimes } from "react-icons/fa";
 import EventCreationForm from "@/components/event-form/EventCreationForm";
 import { AdminEventsFilter, AdminEventsGrid, AdminEventsHeader } from "@/components/admin/events";
@@ -52,6 +52,10 @@ function AdminEvents() {
     return fetchedCategories ? [...defaultCats, ...fetchedCategories] : defaultCats;
   }, [fetchedCategories]);
 
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
   return (
     <div className="flex flex-col h-full font-dm pb-10">
       <AdminEventsHeader 
@@ -79,12 +83,12 @@ function AdminEvents() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 overflow-y-auto no-scrollbar">
           <div className="relative w-full max-w-7xl max-h-full overflow-y-auto rounded-xl shadow-2xl bg-white no-scrollbar">
             <button 
-              onClick={() => setIsModalOpen(false)}
+              onClick={handleModalClose}
               className="absolute top-6 right-6 z-10 text-white/80 hover:text-white bg-black/40 p-2 rounded-full backdrop-blur-sm"
             >
               <FaTimes size={20} />
             </button>
-            <EventCreationForm onClose={() => setIsModalOpen(false)} />
+            <EventCreationForm onClose={handleModalClose} />
           </div>
         </div>
       )}

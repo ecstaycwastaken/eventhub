@@ -11,7 +11,7 @@ function LandingLayout() {
   const { isAuthenticated } = useAuth()
 
   if (isAuthenticated) {
-    return <Navigate to='/home/events' replace />
+    return <Navigate to='/u/events' replace />
   }
 
   const openAuthModal = (tab: 'signin') => {

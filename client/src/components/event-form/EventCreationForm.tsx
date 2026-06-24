@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { FaArrowRight } from "react-icons/fa6";
-
-
+import { useHttp } from "@/hooks/useHttp";
+import { 
+    BasicDetailsSection,
+    DateTimeSection,
+    ImageUploadField,
+    LocationSection,
+    PreviewSidebar,
+    TicketsSection
+} from "./index";
+import Button from "@/components/Button";
 import { type EventItem } from "@/components/event-browser/EventCard";
 import type { Category } from '@/types/category';
-import { useHttp } from "@/hooks/useHttp";
-import Button from "@/components/Button";
-import ImageUploadField from "@/components/event-form/ImageUploadField";
-import BasicDetailsSection from "@/components/event-form/BasicDetailsSection";
-import DateTimeSection from "@/components/event-form/DateTimeSection";
-import LocationSection from "@/components/event-form/LocationSection";
-import TicketsSection from "@/components/event-form/TicketsSection";
-import PreviewSidebar from "@/components/event-form/PreviewSidebar";
-
+import type { EventCreationFormData } from "@/types/event";
+import { FaArrowRight } from "react-icons/fa6";
 
 interface EventCreationFormProps {
     onClose?: () => void;
@@ -24,7 +24,7 @@ function EventCreationForm({ onClose }: EventCreationFormProps) {
     const [bannerImage, setBannerImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<EventCreationFormData>({
         title: "",
         description: "",
         categoryId: null as string | null,

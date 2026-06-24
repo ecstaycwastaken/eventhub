@@ -7,10 +7,15 @@ export interface AuthResponse {
 }
 
 export interface GetAllEventsResponse {
-    hasEvents: boolean; // TODO: Make a snake_case in the backend for this property
+    has_events: boolean;
     events: EventWithCategory[];
     total_events: number;
     categories: {
         [string]: number;
     }
+}
+
+export interface GetAllUsersResponse {
+    message?: string;
+    users: User[];
 }

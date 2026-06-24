@@ -10,7 +10,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true); // Keeps app from flashing login screen
 
-    const { sendRequest } = useHttp<AuthResponse>();
+    const { sendRequest, loading } = useHttp<AuthResponse>();
 
     useEffect(() => {
         const checkAuthStatus = async () => {
@@ -59,11 +59,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [sendRequest]);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, updateAuthState, logout }}>
-            {!isLoading ? children : (
+        <AuthContext.Provider value={{ isAuthenticated, user, updateAuthState, logout, loading }}>
+            {!isLoading ? (
+                <>
+                    {children}
+                    {loading && (
+                        <div className="fixed inset-0 z-9999 bg-bg-page/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                            <Spinner size="lg" variant="primary" />
+                            <p className="text-text-primary font-medium animate-pulse">Logging out...</p>
+                        </div>
+                    )}
+                </>
+            ) : (
                 <div className="flex h-screen flex-col items-center justify-center bg-bg-page gap-4">
                     <Spinner size="lg" variant="primary" />
-                    <p className="text-text-secondary font-medium animate-pulse">Initializing app...</p>
+                    <p className="text-text-primary font-medium animate-pulse">Initializing app...</p>
                 </div>
             )}
         </AuthContext.Provider>

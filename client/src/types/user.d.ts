@@ -6,5 +6,9 @@ export interface User {
     last_name: string;
     profile_image: string | null;
     role: 'user' | 'admin';
+    contact_number: string | null;
+    country: string | null;
+    region: string | null;
+    city: string | null;
     [string]?: string | null;
 }

@@ -18,15 +18,15 @@ import LandingPage from "@/pages/public/LandingPage"
 import UnauthorizedPage from "@/pages/public/UnauthorizedPage"
 import NotFoundPage from "@/pages/public/NotFoundPage"
 
-import HomePage from "@/pages/private/HomePage"
-import MyEventsPage from "@/pages/private/MyEventsPage"
+import HomePage from "@/pages/private/HomePage";
+import EventFormPage from "@/pages/private/EventFormPage";
+import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
+import MyEventsPage from "@/pages/private/MyEventsPage";
 
 import AdminUsers from "./pages/private/AdminUsers";
 
-import AdminDashboardPage from "./pages/private/admin/DashboardPage";
-import AdminEventsPage from "./pages/private/admin/EventsPage";
-import AttendancesPage from "./pages/private/admin/AttendancesPage";
 import CategoriesPage from "./pages/private/admin/CategoriesPage";
+import { AdminDashboardPage, AdminEventsPage, AdminUsersPage } from "@/pages/private/admin";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,16 +39,18 @@ const router = createBrowserRouter(
       <Route path='/unauthorized' element={<UnauthorizedPage />} />
 
       {/* Private Routes */}
-      <Route element={<AuthGuard type="user" />}>
-        <Route path='/home' element={<HomeLayout />}>
+      <Route path='/u' element={<AuthGuard type="user" />}>
+        <Route element={<HomeLayout />}>
           <Route path='events' element={<HomePage />} />
+          <Route path='my-registrations' element={<MyRegistrationsPage />} />
           <Route path='my-events' element={<MyEventsPage />} />
+          <Route path='my-events/create-event' element={<EventFormPage />} />
         </Route>
       </Route>
 
       {/* Admin Routes */}
-      <Route element={<AuthGuard type="admin" />}>
-        <Route path='/admin' element={<AdminLayout />}>
+      <Route path='/admin' element={<AuthGuard type="admin" />}>
+        <Route element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
           <Route path="users" element={<AdminUsers />} />

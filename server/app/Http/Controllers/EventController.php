@@ -277,7 +277,7 @@ class EventController extends Controller
             });
 
             return response()->json([
-                'hasEvents' => !$events->isEmpty(),
+                'has_events' => !$events->isEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
                 'categories' => $categories
@@ -299,6 +299,7 @@ class EventController extends Controller
 
             // Fetch all events along with their categories
             $events = Event::with('category')
+                ->withCount('eventAttendances')
                 ->when($category, function ($q) use ($category) {
                     $q->whereHas('category', function ($relationshipQuery) use ($category) {
                         $relationshipQuery->where('name', 'ilike', "%{$category}%");
@@ -315,7 +316,7 @@ class EventController extends Controller
             });
 
             return response()->json([
-                'hasEvents' => !$events->isEmpty(),
+                'has_events' => !$events->isEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
                 'categories' => $categories
@@ -342,7 +343,7 @@ class EventController extends Controller
 
             // Return success whether the user has events or not, along with the events data
             return response()->json([
-                'hasEvents' => !$events->isEmpty(),
+                'has_events' => !$events->isEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
             ]);
@@ -366,7 +367,7 @@ class EventController extends Controller
 
             // Return success whether the user has registered events or not, along with the events data
             return response()->json([
-                'hasRegisteredEvents' => !$events->isEmpty(),
+                'has_registered_events' => !$events->isEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
             ]);
