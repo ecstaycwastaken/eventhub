@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
 import { useState } from "react";
 import { FaPlus, FaSearch} from "react-icons/fa";
-import AdminUserRow, { type UserInformation, type UserActivity} from "./AdminUserRow";
+import AdminUserRow, { type UserInformation } from "./AdminUserRow";
 
 function AdminPage() {
   const [search, setSearch] = useState("");
@@ -9,7 +9,6 @@ function AdminPage() {
   const userTypes = [
     "all", "host", "attendee",
   ];
-  const [userRole, _setUserRole] = useState("user");
 
   const [users, _setUsers] = useState<UserInformation[]>(
     [
