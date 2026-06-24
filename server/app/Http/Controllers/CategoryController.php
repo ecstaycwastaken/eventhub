@@ -10,7 +10,12 @@ class CategoryController extends Controller
 {
     public function getAllCategories() {
         try {
-            $categories = EventCategory::all();
+            $categories = EventCategory::withCount([
+                'events as event_count',
+                'events as attendance_count' => function ($query) {
+                    $query->join('event_attendances', 'events.id', '=', 'event_attendances.event_id');
+                }
+            ])->get();
             return response()->json($categories);
         } catch (\Exception $e) {
             Log::error('Error fetching categories: ' . $e->getMessage());
