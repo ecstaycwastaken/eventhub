@@ -40,7 +40,7 @@ const FallbackPage = ({
 
   const handleGoHome = () => {
     if (isAuthenticated) {
-      navigate('/home/events');
+      navigate('/u/events');
     } else {
       navigate('/');
     }
@@ -67,22 +67,18 @@ const FallbackPage = ({
             {illustration}
           </div>
 
-          {/* Eyebrow Label */}
           <span className={`text-label uppercase tracking-widest font-semibold block mb-2 ${eyebrowColorClass}`}>
             {eyebrow}
           </span>
 
-          {/* Headline */}
           <h1 className="text-heading-1 font-bold text-ink mb-4">
             {title}
           </h1>
 
-          {/* Body description */}
           <p className="text-text-secondary text-body-1 leading-relaxed mb-6">
             {description}
           </p>
 
-          {/* Helper directive */}
           {helperText && (
             <p className="text-text-muted text-body-2 mb-8">
               {helperText}

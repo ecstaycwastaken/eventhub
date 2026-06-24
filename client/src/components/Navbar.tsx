@@ -1,20 +1,25 @@
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import Button from '@/components/Button';
 import logoImg from '@/assets/logo.png';
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { FaChevronDown } from 'react-icons/fa';
-import { NavLink } from 'react-router-dom';
 
 interface NavbarProps {
   onOpenSignIn?: () => void;
 }
 
 const Navbar = ({ onOpenSignIn }: NavbarProps) => {
-  const { isAuthenticated, user, logout } = useAuth()
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { isAuthenticated, user, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const displayName = user?.username || user?.first_name || 'User';
-  const initial = displayName.charAt(0).toUpperCase()
+  const initial = displayName.charAt(0).toUpperCase();
+
+  const onLogout = () => {
+    logout();
+    setIsDropdownOpen(false);
+  }
 
   return (
     <nav className='border-b border-b-foreground bg-background sticky top-0 z-50'>
@@ -25,7 +30,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
           {isAuthenticated && (
             <div className='hidden md:flex items-center gap-2 font-dm'>
               <NavLink
-                to='/home/events'
+                to='/u/events'
                 className={({ isActive }: { isActive: boolean }) => `px-5 py-2 text-sm font-semibold rounded-full transition-colors 
                 ${isActive ? 'bg-brand-red text-white' : 'text-gray-500 hover:text-gray-900 cursor-pointer'}`}
               >
@@ -33,7 +38,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
               </NavLink>
 
               <NavLink
-                to='/home/my-registrations'
+                to='/u/my-registrations'
                 className={({ isActive }: { isActive: boolean }) => `px-5 py-2 text-sm font-semibold rounded-full transition-colors 
                 ${isActive ? 'bg-brand-red text-white' : 'text-gray-500 hover:text-gray-900 cursor-pointer'}`}
               >
@@ -41,7 +46,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
               </NavLink>
 
               <NavLink
-                to='/home/my-events'
+                to='/u/my-events'
                 className={({ isActive }: { isActive: boolean }) => `px-5 py-2 text-sm font-semibold rounded-full transition-colors 
                 ${isActive ? 'bg-brand-red text-white' : 'text-gray-500 hover:text-gray-900 cursor-pointer'}`}
               >
@@ -80,14 +85,19 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
                       <p className="text-xs text-gray-500">Signed in as</p>
                       <p className="text-sm font-bold text-gray-900 truncate">{user?.email}</p>
                     </div>
+                    {user?.role === 'admin' && (
+                      <NavLink
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
+                      >
+                        Admin Dashboard
+                      </NavLink>
+                    )}
                     <Button
                       bgColorClass="bg-transparent"
                       textColorClass="text-brand-red"
                       className="w-full text-left px-4 py-2 text-sm hover:bg-red-100 font-medium transition-colors"
-                      onClick={() => {
-                        logout()
-                        setIsDropdownOpen(false)
-                      }}
+                      onClick={onLogout}
                     >
                       Sign out
                     </Button>
