@@ -1,6 +1,6 @@
 import { FaArrowRight } from "react-icons/fa6";
 
-import EventCard, { type EventItem } from "../EventCard";
+import EventCard, { type EventItem } from "@/components/event-browser/EventCard";
 import Button from "../Button";
 
 interface PreviewSidebarProps {
@@ -10,7 +10,7 @@ interface PreviewSidebarProps {
 
 function PreviewSidebar({ previewEvent, isSubmitting }: PreviewSidebarProps) {
   return (
-    <aside className="w-full lg:w-[32%] sticky top-6 bg-white border border-[#E5E7EB] rounded-xl p-6 shadow-sm">
+    <aside className="w-full lg:w-[32%] sticky top-6 bg-white border border-gray rounded-xl p-6 shadow-sm">
         <p className="text-gray text-sub-1 mb-5">EVENT PREVIEW</p>
 
         <div className="pointer-events-none mb-6">

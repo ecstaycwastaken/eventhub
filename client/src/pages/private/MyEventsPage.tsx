@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { FaArrowRight } from "react-icons/fa6";
 
-import Button from "@/components/Button";
-import { type EventItem } from "@/components/EventCard";
+
+import { type EventItem } from "@/components/event-browser/EventCard";
+import type { Category } from '@/types/category';
 import { useHttp } from "@/hooks/useHttp";
-import ImageUploadField from "@/components/eventForm/ImageUploadField";
-import BasicDetailsSection from "@/components/eventForm/BasicDetailsSection";
-import DateTimeSection from "@/components/eventForm/DateTimeSection";
-import LocationSection from "@/components/eventForm/LocationSection";
-import TicketsSection from "@/components/eventForm/TicketsSection";
-import PreviewSidebar from "@/components/eventForm/PreviewSidebar";
+import Button from "@/components/Button";
+import ImageUploadField from "@/components/event-form/ImageUploadField";
+import BasicDetailsSection from "@/components/event-form/BasicDetailsSection";
+import DateTimeSection from "@/components/event-form/DateTimeSection";
+import LocationSection from "@/components/event-form/LocationSection";
+import TicketsSection from "@/components/event-form/TicketsSection";
+import PreviewSidebar from "@/components/event-form/PreviewSidebar";
 
 
 function MyEventsPage() {
@@ -35,7 +37,7 @@ function MyEventsPage() {
     };
 
     const { sendRequest, loading: isSubmitting, error } = useHttp<EventItem>();
-    const { data: fetchedCategories, sendRequest: fetchCategories, loading: isLoadingCategories } = useHttp<any[]>();
+    const { data: fetchedCategories, sendRequest: fetchCategories, loading: isLoadingCategories } = useHttp<Category[]>();
 
     useEffect(() => {
         fetchCategories({
@@ -54,13 +56,16 @@ function MyEventsPage() {
     const previewEvent: EventItem = {
         id: 'preview',
         user_id: 'preview',
+        category_id: formData.categoryId || '0',
         title: formData.title || 'Your Event Name',
         description: formData.description || 'Preview description',
         date: previewDate,
         venue: formData.venue || 'Venue Location',
         capacity: Number(formData.capacity) || 0,
-        price: formData.ticketType === "Free" ? "0" : (formData.price || "0"),
-        banner_image: previewImage, 
+        price: formData.ticketType === "Free" ? 0.0 : (Number(formData.price) || 0),
+        banner_image: previewImage || "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         category: {
             id: formData.categoryId || '0',
             name: selectedCategory ? selectedCategory.name : 'Category',
@@ -142,7 +147,7 @@ function MyEventsPage() {
         </div>
 
         <div className="max-w-285 w-full mx-auto px-4 lg:px-10 mt-8 flex flex-col lg:flex-row gap-8 items-start">
-            <main className="w-full lg:w-[65%] bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-6 md:p-8">
+            <main className="w-full lg:w-[65%] bg-white rounded-xl border border-gray shadow-sm p-6 md:p-8">
                 <form id="create-event-form" onSubmit={handleSubmit} className="flex flex-col">
 
                     <ImageUploadField 
@@ -174,7 +179,7 @@ function MyEventsPage() {
                         handleChange={handleChange}
                     />
 
-                    <section className="border-t border-[#E5E7EB] pt-7 mt-2">
+                    <section className="border-t border-gray pt-7 mt-2">
                         <div className="bg-yellow border border-border-yellow p-3 rounded-xl mb-6">
                             <p className="text-caption-3 text-[#973C00]">
                                 <b>IMPORTANT</b>: Please ensure that all event details provided are accurate and fully comply with our <span className="underline">Terms of Service</span>. We maintain a strict zero-tolerance policy for any illegal activities. It is your sole responsibility to ensure that your event is lawful, safe, and does not promote unauthorized commerce, restricted substances, or illicit behavior. Failure to comply will result in immediate event cancellation, account termination, and potential reporting to local law enforcement.
@@ -182,11 +187,11 @@ function MyEventsPage() {
                         </div>
                     </section>
                     
-                    <div className="flex flex-col-reverse md:flex-row justify-between items-center border-t border-[#E5E7EB] pt-8 mt-4 gap-4">
+                    <div className="flex flex-col-reverse md:flex-row justify-between items-center border-t border-gray pt-8 mt-4 gap-4">
                         <Button
                             bgColorClass="bg-transparent"
                             textColorClass="text-black"
-                            className="border border-[#E5E7EB] text-button-md py-3 rounded-xl w-full md:w-[50%]"
+                            className="border border-gray text-button-md py-3 rounded-xl w-full md:w-[50%]"
                         >
                             Discard
                         </Button>

@@ -10,7 +10,7 @@ function ImageUploadField({
 }) {
   return (
     <label className="flex flex-col items-center justify-center w-full h-45 border-2 border-dashed 
-        border-[#E5E7EB] rounded-xl gap-2 cursor-pointer bg-[#FAFAFA] hover:bg-[#F5F6F8]
+        border-gray rounded-xl gap-2 cursor-pointer bg-[#FAFAFA] hover:bg-[#F5F6F8]
         hover:border-[#555555] transition-all mb-6 group relative overflow-hidden">
         
         {previewImage ? (

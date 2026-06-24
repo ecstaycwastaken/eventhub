@@ -34,7 +34,7 @@ function BasicDetailsSection({
             <label htmlFor="title" className="text-black text-sub-1 block mb-2">
                 Event Name <span className="text-[#E8313A]">*</span>
             </label>
-            <input className="border border-[#E5E7EB] px-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
+            <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
                 placeholder="Enter event name..." 
                 type="text"
                 name="title"
@@ -78,7 +78,7 @@ function BasicDetailsSection({
             <label htmlFor="description" className="text-black text-sub-1 block mb-2">
                 Short Description <span className="text-[#E8313A]">*</span>
             </label>
-            <textarea className="border border-[#E5E7EB] px-4 py-2.5 rounded-xl text-caption-2 w-full min-h-30" 
+            <textarea className="border border-gray px-4 py-2.5 rounded-xl text-caption-2 w-full min-h-30" 
                 placeholder="Brief summary of the event..."
                 name="description"
                 id="description"
