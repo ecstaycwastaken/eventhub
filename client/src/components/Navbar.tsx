@@ -1,9 +1,9 @@
-import Button from '@/components/Button'
-import logoImg from '@/assets/logo.png'
-import { useAuth } from '@/context/AuthContext'
-import { FaChevronDown } from 'react-icons/fa'
-import { NavLink, Link } from 'react-router-dom'
-import { useState } from 'react'
+import Button from '@/components/Button';
+import logoImg from '@/assets/logo.png';
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { FaChevronDown } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
 
 interface NavbarProps {
   onOpenSignIn?: () => void;
