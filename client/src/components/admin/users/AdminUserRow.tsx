@@ -4,9 +4,12 @@ import type { User } from "@/types/user";
 
 interface UserRowProps {
   user: User;
+  onView: (id: string) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function UserRow({ user }: UserRowProps) {
+export default function UserRow({ user, onView, onEdit, onDelete }: UserRowProps) {
   const isUser = user.role === "user";
 
   const getInitials = (first: string, last: string) => {
@@ -68,13 +71,22 @@ export default function UserRow({ user }: UserRowProps) {
       {/* Actions */}
       <td className="px-6 py-4 text-center">
         <div className="flex items-center justify-center gap-2">
-          <button className="p-2 text-text-secondary hover:text-ink transition-all hover:cursor-pointer">
+          <button 
+            className="p-2 text-text-secondary hover:text-ink transition-all hover:cursor-pointer"
+            onClick={() => onView(user.id)}
+          >
             <FaEye size={14} />
           </button>
-          <button className="p-2 text-text-secondary hover:text-action-secondary transition-all hover:cursor-pointer">
+          <button 
+            className="p-2 text-text-secondary hover:text-action-secondary transition-all hover:cursor-pointer"
+            onClick={() => onEdit(user.id)}
+          >
             <FaPencil size={14} />
           </button>
-          <button className="p-2 text-text-secondary hover:text-danger transition-all hover:cursor-pointer">
+          <button 
+            className="p-2 text-text-secondary hover:text-danger transition-all hover:cursor-pointer"
+            onClick={() => onDelete(user.id)}
+          >
             <FaTrash size={14} />
           </button>
         </div>

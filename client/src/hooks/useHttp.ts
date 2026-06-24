@@ -57,11 +57,11 @@ export function useHttp<T>() {
         []
     );
 
-    const reset = () => {
+    const reset = useCallback(() => {
         setData(null);
-        setError({ message: "", suggestion: "" });
+        setError(null);
         setLoading(false);
-    };
+    }, []);
 
     return { data, error, loading, sendRequest, reset };
 }

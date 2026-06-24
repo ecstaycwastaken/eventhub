@@ -19,3 +19,8 @@ export interface GetAllUsersResponse {
     message?: string;
     users: User[];
 }
+
+export interface GetUserByIdResponse {
+    message?: string;
+    user: User;
+}
