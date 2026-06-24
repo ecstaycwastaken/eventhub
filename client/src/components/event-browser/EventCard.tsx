@@ -7,9 +7,10 @@ export type EventItem = EventWithCategory;
 
 interface EventCardProps {
   event: EventWithCategory
+  isOwned?: boolean
 }
 
-function EventCard({ event }: EventCardProps) {
+function EventCard({ event, isOwned = false }: EventCardProps) {
   const price =
     Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
 
@@ -35,9 +36,15 @@ function EventCard({ event }: EventCardProps) {
           className="h-full w-full object-cover"
         />
 
-        <div className="absolute right-3 top-3 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
-          {price}
-        </div>
+        {isOwned ? (
+          <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text">
+            Published
+          </div>
+        ) : (
+          <div className="absolute right-3 top-3 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
+            {price}
+          </div>
+        )}
 
         <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white">
           {event.capacity} slots left
@@ -60,12 +67,31 @@ function EventCard({ event }: EventCardProps) {
           <span className="truncate">{event.venue}</span>
         </p>
 
-        <Button
-          bgColorClass="bg-blue-600"
-          className="w-full rounded-xl mt-2 py-2 font-semibold"
-        >
-          Request to Join
-        </Button>
+        {isOwned ? (
+          <div className="flex w-full gap-2 mt-2">
+            <Button
+              bgColorClass="bg-white"
+              textColorClass="text-black"
+              className="w-[70%] rounded-xl py-2 font-semibold border border-gray shadow-sm"
+            >
+              Manage
+            </Button>
+            <Button
+              bgColorClass="bg-white"
+              textColorClass="text-red-600"
+              className="w-[30%] rounded-xl py-2 font-semibold border border-gray shadow-sm"
+            >
+              Delete
+            </Button>
+          </div>
+        ) : (
+          <Button
+            bgColorClass="bg-blue-600"
+            className="w-full rounded-xl mt-2 py-2 font-semibold"
+          >
+            Request to Join
+          </Button>
+        )}
       </div>
     </div>
   )
