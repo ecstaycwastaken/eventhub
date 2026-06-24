@@ -1,11 +1,13 @@
 import { Spinner } from "@/components/ui/spinner";
+import type { EventCreationFormData } from "@/types/event";
+import type { Category } from "@/types/category";
 
 interface BasicDetailsProps {
-    formData: any; 
-    handleChange: (field: string, value: any) => void;
-    activeCategories: any[];
+    formData: EventCreationFormData; 
+    handleChange: (field: string, value: string | number) => void;
+    activeCategories: Category[];
     isLoadingCategories: boolean;
-    error: any;
+    error: { message?: string } | null;
     localError: string | null; 
 }
 

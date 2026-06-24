@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { FaTimes } from "react-icons/fa";
-import EventCreationForm from "@/components/event-form/EventCreationForm";
+import { EventForm } from "@/components/event-form";
 import { AdminEventsFilter, AdminEventsGrid, AdminEventsHeader } from "@/components/admin/events";
 import { useHttp, useDebounce } from "@/hooks";
 import type { GetAllEventsResponse } from "@/types/response";
@@ -88,7 +88,12 @@ function AdminEvents() {
             >
               <FaTimes size={20} />
             </button>
-            <EventCreationForm onClose={handleModalClose} />
+            <EventForm
+              mode="create"
+              fetchedCategories={fetchedCategories || []}
+              onCancel={handleModalClose}
+              onSuccess={handleModalClose}
+            />
           </div>
         </div>
       )}
