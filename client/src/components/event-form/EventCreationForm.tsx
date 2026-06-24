@@ -19,12 +19,24 @@ interface EventCreationFormProps {
     onClose?: () => void;
 }
 
+export interface EventFormData {
+    title: string;
+    description: string;
+    categoryId: string | null;
+    eventDate: string;
+    eventTime: string;
+    venue: string;
+    capacity: string;
+    price: string;
+    ticketType: "Free" | "Paid";
+}
+
 function EventCreationForm({ onClose }: EventCreationFormProps) {
     const [localError, setLocalError] = useState<string | null>(null);
     const [bannerImage, setBannerImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<EventFormData>({
         title: "",
         description: "",
         categoryId: null as string | null,

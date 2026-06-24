@@ -32,7 +32,7 @@ export function EventCategories({ categories, searchParams, setSearchParams }: E
   };
 
   return (
-    <div className="w-full mx-auto border-b border-gray-400 flex flex-wrap gap-3 px-4 md:px-8 lg:px-16 py-4">
+    <div className="w-full mx-auto border-b border-gray-400 flex overflow-x-auto no-scrollbar gap-3 px-4 md:px-8 lg:px-16 py-4">
       {categories.map((category) => {
         const item = { ...category }; // Create a new object to avoid mutating the original category
         const active = isActive(item.name.toLowerCase()); 

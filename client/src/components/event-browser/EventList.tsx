@@ -7,10 +7,9 @@ interface EventListProps {
   events: EventWithCategory[];
   loading: boolean;
   error: string | null;
-  currentUserId?: string;
 }
 
-export function EventList({ events, loading, error, currentUserId }: EventListProps) {
+export function EventList({ events, loading, error }: EventListProps) {
   const showLoading = loading && events.length === 0;
   const showEvents = events.length > 0;
   const showEmpty = !loading && !error && events.length === 0;
@@ -24,7 +23,7 @@ export function EventList({ events, loading, error, currentUserId }: EventListPr
         </div>
       )}
       {error && events.length === 0 && <p className="col-span-full text-center text-red-500">{error}</p>}
-      {showEvents && events.map((event) => <EventCard key={event.id} event={event} currentUserId={currentUserId} />)}
+      {showEvents && events.map((event) => <EventCard key={event.id} event={event} />)}
       {showEmpty && (
         <p className="col-span-full text-center text-gray-500">No events found.</p>
       )}

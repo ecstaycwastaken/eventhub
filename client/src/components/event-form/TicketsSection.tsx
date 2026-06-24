@@ -1,9 +1,11 @@
+import type { EventFormData } from "./EventCreationForm";
+
 function TicketsSection({ formData, handleChange }: { 
-    formData: any; 
-    handleChange: (field: string, value: any) => void; 
+    formData: EventFormData; 
+    handleChange: (field: string, value: string | number) => void; 
 }) {
   return (
-    <section className="border-t border-[#E5E7EB] pt-7 mt-2">
+    <section className="border-t border-border-gray pt-7 mt-2">
         <p className="text-gray text-sub-1 mb-5">TICKETS & CAPACITY</p>
 
         <div className="flex bg-[#F5F6F8] rounded-lg p-1 w-fit mb-5" role="radiogroup">
@@ -13,7 +15,7 @@ function TicketsSection({ formData, handleChange }: {
                     type="button" 
                     role="radio"
                     aria-checked={formData.ticketType === type}
-                    onClick={() => handleChange("type", type)} 
+                    onClick={() => handleChange("ticketType", type)} 
                     className={`px-5 py-2 text-[14px] rounded-md transition-all ${formData.ticketType === type ? 'bg-[#1A1A1A] text-white font-semibold' : 'text-[#555555] font-medium hover:text-[#1A1A1A]'}`}
                 >
                     {type}
@@ -29,7 +31,7 @@ function TicketsSection({ formData, handleChange }: {
                     </label>
                     <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555555] font-medium">₱</span>
-                        <input className="border border-[#E5E7EB] pl-10 pr-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
+                        <input className="border border-border-gray pl-10 pr-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
                             placeholder="0.00" 
                             type="number"
                             name="price"
@@ -45,7 +47,7 @@ function TicketsSection({ formData, handleChange }: {
                 <label htmlFor="capacity" className="text-black text-sub-1 block mb-2">
                     Available Slots <span className="text-[#E8313A]">*</span>
                 </label>
-                <input className="border border-[#E5E7EB] px-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
+                <input className="border border-border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full h-11" 
                     placeholder="e.g. 500" 
                     type="number"
                     name="capacity"
