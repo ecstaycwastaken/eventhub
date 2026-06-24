@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { AdminUsersFilter, AdminUsersTable, AdminViewUserModal, AdminEditUserModal } from "@/components/admin/users";
+import { AdminUsersFilter, AdminUsersTable, AdminViewUserModal, AdminEditUserModal, AdminCreateUserModal } from "@/components/admin/users";
 import { PageHeader } from "@/components/admin";
 import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 import { useHttp, useDebounce } from "@/hooks";
@@ -14,6 +14,7 @@ function AdminPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { 
     loading: usersLoading, 
@@ -89,7 +90,7 @@ function AdminPage() {
         subtitle="Manage all registered users on the platform"
         total={users.length}
         type="users"
-        onCreate={() => {}}
+        onCreate={() => setIsCreateModalOpen(true)}
       />
 
       <AdminUsersFilter 
@@ -119,6 +120,12 @@ function AdminPage() {
         userId={editUserId}
         isOpen={!!editUserId}
         onClose={() => setEditUserId(null)}
+        onSuccess={() => getUsers({ method: 'GET', url: `/api/v1/user` })}
+      />
+
+      <AdminCreateUserModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => getUsers({ method: 'GET', url: `/api/v1/user` })}
       />
 

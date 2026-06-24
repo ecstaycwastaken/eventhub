@@ -22,7 +22,8 @@ class AuthController extends Controller
                 'city' => 'nullable|string',
                 'password' => 'required|string|confirmed',
                 'password_confirmation' => 'required|string',
-                'profile_image' => 'nullable|string'
+                'profile_image' => 'nullable|string',
+                'role' => 'nullable|string|in:user,admin'
             ]);
 
             // Create user using Supabase Auth API
@@ -72,7 +73,7 @@ class AuthController extends Controller
                 'country' => $request->country,
                 'region' => $request->region,
                 'city' => $request->city,
-                'role' => 'user',
+                'role' => $request->role ?? 'user',
                 'profile_image' => $request->profile_image ?? null
             ]);
 

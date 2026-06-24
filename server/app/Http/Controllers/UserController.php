@@ -68,6 +68,7 @@ class UserController extends Controller
                 'country' => 'nullable|string',
                 'region' => 'nullable|string',
                 'city' => 'nullable|string',
+                'role' => 'nullable|string|in:user,admin',
             ]);
 
         try {
@@ -76,6 +77,12 @@ class UserController extends Controller
             if ($user->id !== $request->user()->id && $request->user()->role !== 'admin') {
                 return response()->json([
                     'message' => 'Forbidden. Unauthorized to edit this user.'
+                ], 403);
+            }
+
+            if ($request->has('role') && $request->user()->role !== 'admin') {
+                return response()->json([
+                    'message' => 'Forbidden. Only admins can change roles.'
                 ], 403);
             }
 
@@ -109,7 +116,7 @@ class UserController extends Controller
                 }
             }
 
-            $user->update($request->only(['first_name', 'last_name', 'contact_number', 'country', 'region', 'city']));
+            $user->update($request->only(['first_name', 'last_name', 'contact_number', 'country', 'region', 'city', 'role']));
             return response()->json([
                 'message' => 'User updated successfully.'
             ]);
