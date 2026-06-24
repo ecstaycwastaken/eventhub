@@ -5,7 +5,7 @@ import Button from "@/components/Button"
 import EventCard, { type EventItem } from "@/components/EventCard";
 
 function MyEventsPage() {
-    const [error, setError] = useState(null)
+    const [error, _setError] = useState<string | null>(null)
     const [charCount, setCharCount] = useState(0)
     const [ticketType, setTicketType] = useState<"Free" | "Paid">("Free")
 

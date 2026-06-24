@@ -259,6 +259,9 @@ class EventController extends Controller
         }
     }
 
+    /**
+     * NOTE: To be adjusted, this method is currently not used.
+     */
     public function searchEvents(Request $request) {
         try {
             $query = $request->query('q', '');
@@ -291,15 +294,21 @@ class EventController extends Controller
     public function getAllEvents(Request $request) {
         try {
             // Filter events
-            $query = $request->query('category', null);
+            $category = $request->query('category', null);
+            $query = $request->query('q', null);
 
             // Fetch all events along with their categories
             $events = Event::with('category')
-                ->when($query, function ($q) use ($query) {
-                    $q->whereHas('category', function ($relationshipQuery) use ($query) {
-                        $relationshipQuery->where('name', 'ilike', "%{$query}%");
+                ->when($category, function ($q) use ($category) {
+                    $q->whereHas('category', function ($relationshipQuery) use ($category) {
+                        $relationshipQuery->where('name', 'ilike', "%{$category}%");
                     });
-                })->get();
+                })
+                ->when($query, function ($q) use ($query) {
+                    $q->where('title', 'ilike', "%{$query}%")
+                      ->orWhere('description', 'ilike', "%{$query}%");
+                })
+                ->get();
             
             $categories = $events->groupBy('category.name')->map(function ($group) {
                 return $group->count();
