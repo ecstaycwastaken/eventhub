@@ -7,6 +7,9 @@ interface AdminUsersTableProps {
   loading: boolean;
   error: { message?: string } | null;
   onClearFilters: () => void;
+  onViewUser: (id: string) => void;
+  onEditUser: (id: string) => void;
+  onDeleteUser: (id: string) => void;
 }
 
 export default function AdminUsersTable({
@@ -14,6 +17,9 @@ export default function AdminUsersTable({
   loading,
   error,
   onClearFilters,
+  onViewUser,
+  onEditUser,
+  onDeleteUser,
 }: AdminUsersTableProps) {
   if (loading) {
     return (
@@ -63,7 +69,7 @@ export default function AdminUsersTable({
           </thead>
           <tbody className="divide-y divide-border">
             {users.map((user) => (
-              <UserRow key={user.id} user={user} />
+              <UserRow key={user.id} user={user} onView={onViewUser} onEdit={onEditUser} onDelete={onDeleteUser} />
             ))}
           </tbody>
         </table>

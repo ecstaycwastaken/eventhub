@@ -14,6 +14,7 @@ import { type EventItem } from "@/components/event-browser/EventCard";
 import type { Category } from '@/types/category';
 import type { EventCreationFormData } from "@/types/event";
 import { FaArrowRight } from "react-icons/fa6";
+import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 
 export interface EventFormProps {
     mode: 'create' | 'edit';
@@ -332,37 +333,14 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
             </div>
 
             {/* Delete Confirmation Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 overflow-y-auto no-scrollbar">
-                    <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl p-6 flex flex-col gap-4 text-center">
-                        <h2 className="text-heading-3 text-black">Delete Event</h2>
-                        <p className="text-body-2 text-gray">
-                            Are you sure you want to delete this event? This action cannot be undone.
-                        </p>
-                        <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
-                            <Button 
-                                bgColorClass="bg-transparent" 
-                                textColorClass="text-black" 
-                                className="border border-gray rounded-xl py-2.5 flex-1" 
-                                type="button"
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                disabled={isDeleting}
-                            >
-                                Cancel
-                            </Button>
-                            <Button 
-                                bgColorClass="bg-[#E8313A]" 
-                                className="rounded-xl py-2.5 flex-1 disabled:opacity-70 text-white" 
-                                type="button"
-                                onClick={handleDelete}
-                                disabled={isDeleting}
-                            >
-                                {isDeleting ? "Deleting..." : "Confirm Delete"}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                title="Delete Event"
+                description="Are you sure you want to delete this event? This action cannot be undone."
+                isDeleting={isDeleting}
+                onCancel={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+            />
         </div>
     )
 }
