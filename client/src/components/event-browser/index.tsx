@@ -38,13 +38,18 @@ export default function EventBrowser({
   } = useHttp<Category[]>();
 
   const category = searchParams.get('category')?.toLowerCase() || null;
+  const q = searchParams.get('q') || null;
 
   useEffect(() => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (q) params.set('q', q);
+
     getAllEvents({
       method: 'GET',
-      url: `/api/v1/event?category=${category || ''}`,
+      url: `/api/v1/event?${params.toString()}`,
     });
-  }, [getAllEvents, category]);
+  }, [getAllEvents, category, q]);
 
   useEffect(() => {
     getAllCategories({
@@ -53,10 +58,8 @@ export default function EventBrowser({
     });
   }, [getAllCategories]);
 
-  // Handle the response which could be an array or an object with an events property
   const events: EventWithCategory[] = useMemo(() => {
     if (!getAllEventsData) return [];
-    console.log('Received data:', getAllEventsData);
     return Array.isArray(getAllEventsData) ? getAllEventsData : (getAllEventsData.events || []);
   }, [getAllEventsData]);
 
@@ -85,7 +88,7 @@ export default function EventBrowser({
       <div className="w-full flex flex-col items-center gap-4 pb-16">
         {!getAllCategoriesLoading && getAllCategoriesError ? (
           <p className="col-span-full text-center text-red-500">
-            Failed to load categories.
+            {getAllCategoriesError?.message || "Failed to load categories."}
           </p>
         ) : (
           <EventCategories 
