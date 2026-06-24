@@ -5,7 +5,7 @@ import {
   EventsByCategoryChart,
   RecentEvents,
   RecentAttendances
-} from '@/components/admin';
+} from '@/components/admin/dashboard';
 import { useHttp } from '@/hooks/useHttp';
 import { Spinner } from '@/components/ui/spinner';
 import { IoMdAlert } from "react-icons/io";

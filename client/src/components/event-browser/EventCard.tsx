@@ -8,14 +8,16 @@ import EventDetailsModal from './EventDetailsModal';
 export type EventItem = EventWithCategory;
 
 interface EventCardProps {
-  event: EventWithCategory
+  event: EventWithCategory;
   currentUserId?: string;
+  isOwned?: boolean;
 }
 
-function EventCard({ event, currentUserId }: EventCardProps) {
+function EventCard({ event, currentUserId, isOwned }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isOwner = currentUserId === event.user_id;
 
+function EventCard({ event, isOwned = false }: EventCardProps) {
   const price =
     Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
 
@@ -33,18 +35,23 @@ function EventCard({ event, currentUserId }: EventCardProps) {
   })
 
   return (
-    <>
-      <div className="overflow-hidden w-full rounded-2xl border border-border-gray bg-white shadow-sm">
-        <div className="relative h-60 w-full overflow-hidden rounded-t-2xl">
-          <img
-            src={event.banner_image || heroBG}
-            alt={event.title}
-            className="h-full w-full object-cover"
-          />
+    <div className="overflow-hidden w-full rounded-2xl border border-border-gray bg-white shadow-sm">
+      <div className="relative h-60 w-full overflow-hidden rounded-t-2xl">
+        <img
+          src={event.banner_image || heroBG}
+          alt={event.title}
+          className="h-full w-full object-cover"
+        />
 
+        {isOwned ? (
+          <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text">
+            Published
+          </div>
+        ) : (
           <div className="absolute right-3 top-3 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
             {price}
           </div>
+        )}
 
           <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white">
             {event.capacity} slots left
