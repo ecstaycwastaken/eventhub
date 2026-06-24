@@ -20,6 +20,7 @@ import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"
 import AdminPage from "./pages/private/AdminPage";
 import AdminEvents from "./pages/private/AdminEvents";
+import AdminUsers from "./pages/private/AdminUsers";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
       <Route path='/admin' element={<AdminLayout />}>
         <Route index element={<AdminPage />} />
         <Route path="events" element={<AdminEvents />} />
+        <Route path="users" element={<AdminUsers />} />
       </Route>
 
       {/* Public Routes */}
