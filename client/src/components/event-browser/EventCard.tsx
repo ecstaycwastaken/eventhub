@@ -1,7 +1,9 @@
-import heroBG from '../assets/hero-bg.png';
-import Button from './Button';
+import heroBG from '@/assets/hero-bg.png';
+import Button from '../Button';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import type { EventWithCategory } from "@/types/event";
+
+export type EventItem = EventWithCategory;
 
 interface EventCardProps {
   event: EventWithCategory
