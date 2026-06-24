@@ -1,16 +1,18 @@
-import AttendanceRow, { type AttendanceDetails } from "@/components/admin/AttendanceRow";
-import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import { LuEllipsis, LuLibrary, LuUserCheck } from "react-icons/lu";
+import { useState, useMemo, useCallback } from "react";
+import { PageHeader } from "@/components/admin";
+import { 
+  AdminAttendancesFilter, 
+  AdminAttendancesTable, 
+  type AttendanceDetails 
+} from "@/components/admin/attendances";
+import { LuLibrary, LuEllipsis, LuUserCheck } from "react-icons/lu";
+import { toast } from "sonner";
 
 function AttendancesPage() {
   const [search, setSearch] = useState("");
-  const [statuses, _setStatuses] = useState<string[]>([
-    "all", "registered", "attended"
-  ]);
   const [selectedStatus, setSelectedStatus] = useState("all");
 
-  const [attendances, _setAttendances] = useState<AttendanceDetails[]>([
+  const [attendances, setAttendances] = useState<AttendanceDetails[]>([
     {
       id: 1,
       first_name: "Karl Joseph",
@@ -38,7 +40,7 @@ function AttendancesPage() {
       code: "SWF-0001"
     },
     {
-      id: 2,
+      id: 3,
       first_name: "Juan",
       last_name: "Dela Cruz",
       username: "jdc_123",
@@ -48,97 +50,109 @@ function AttendancesPage() {
       event_color: "#1e3a8a",
       event_date: "Jan 30, 2027",
       status: "registered",
-      code: "SWF-0001"
+      code: "SWF-0002"
     },
   ]);
 
+  const filteredAttendances = useMemo(() => {
+    let filtered = attendances;
+
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((a) => a.status.toLowerCase() === selectedStatus.toLowerCase());
+    }
+
+    if (search) {
+      const query = search.toLowerCase();
+      filtered = filtered.filter(
+        (a) =>
+          a.first_name.toLowerCase().includes(query) ||
+          a.last_name.toLowerCase().includes(query) ||
+          a.username.toLowerCase().includes(query) ||
+          a.event_name.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [attendances, search, selectedStatus]);
+
+  const handleClearFilters = useCallback(() => {
+    setSearch("");
+    setSelectedStatus("all");
+  }, []);
+
+  const handleMarkAttended = (id: number) => {
+    setAttendances(prev => prev.map(a => 
+      a.id === id ? { ...a, status: "attended" as const } : a
+    ));
+    toast.success("Attendance marked successfully!", {
+      classNames: {
+        toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+      }
+    });
+  };
+
+  const handleDelete = (id: number) => {
+    setAttendances(prev => prev.filter(a => a.id !== id));
+    toast.success("Record deleted successfully!", {
+      classNames: {
+        toast: 'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
+      }
+    });
+  };
+
+  const stats = {
+    total: attendances.length,
+    registered: attendances.filter(a => a.status === "registered").length,
+    attended: attendances.filter(a => a.status === "attended").length
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="w-full bg-white rounded-lg mb-8 shadow-sm border border-border-gray">
-        <div className="grid grid-cols-2 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10">
-        
-        <div className="p-6 flex flex-col items-center justify-center text-center border-r border-black/10">
-          <span className="text-3xl font-bold mb-1">12</span>
-          <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuLibrary /> TOTAL RECORDS</span>
-          <span className="text-sm text-gray-500">Across all events</span>
-        </div>
+    <div className="flex flex-col h-full font-dm pb-10">
+      <PageHeader 
+        title="Attendances" 
+        subtitle="Manage event registrations and attendances"
+        total={attendances.length}
+        type="attendances"
+      />
 
-        <div className="p-6 flex flex-col items-center justify-center text-center border-r border-black/10">
-          <span className="text-3xl font-bold mb-1">7</span>
-          <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuEllipsis /> REGISTERED</span>
-          <span className="text-sm text-gray-500">Pending attendances</span>
-        </div>
+      {/* Stats Summary */}
+      <div className="w-full bg-white rounded-xl mb-8 shadow-sm border border-border-gray">
+        <div className="grid grid-cols-2 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-black/10">
+          <div className="p-6 flex flex-col items-center justify-center text-center border-r border-black/10">
+            <span className="text-3xl font-bold mb-1">{stats.total}</span>
+            <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuLibrary /> TOTAL RECORDS</span>
+            <span className="text-sm text-gray-500">Across all events</span>
+          </div>
 
-        <div className="p-6 flex flex-col items-center justify-center text-center border-r border-black/10">
-          <span className="text-3xl font-bold mb-1">27</span>
-          <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuUserCheck /> ATTENDED</span>
-          <span className="text-sm text-gray-500">Users who attended</span>
-        </div>
+          <div className="p-6 flex flex-col items-center justify-center text-center border-r border-black/10">
+            <span className="text-3xl font-bold mb-1">{stats.registered}</span>
+            <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuEllipsis /> REGISTERED</span>
+            <span className="text-sm text-gray-500">Pending attendances</span>
+          </div>
 
+          <div className="p-6 flex flex-col items-center justify-center text-center">
+            <span className="text-3xl font-bold mb-1">{stats.attended}</span>
+            <span className="text-[11px] uppercase tracking-wider font-medium text-gray-400 mb-2 flex items-center gap-1.5"><LuUserCheck /> ATTENDED</span>
+            <span className="text-sm text-gray-500">Users who attended</span>
+          </div>
         </div>
       </div>
 
-      {/* search and filter */}
-      <div className="flex w-full items-center gap-2">
-        <div className="flex items-center flex-1 border border-gray-300 rounded-md p-2 gap-2">
-          <FaSearch className="text-gray-300" />
-          <input
-            type="text"
-            placeholder="Search attendances..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="
-              w-full
-              focus:outline-none
-            "
-          />
-        </div>
+      <AdminAttendancesFilter 
+        search={search}
+        setSearch={setSearch}
+        status={selectedStatus}
+        setStatus={setSelectedStatus}
+      />
 
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
-        >
-          {statuses.map((s) => (
-            <option key={s} value={s}>
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <table className="w-full table-fixed my-8 rounded-md border border-border-gray border-separate border-spacing-2">
-        <thead>
-          <tr className="my-4">
-            <th className="w-64">USER</th>
-            <th className="text-center w-64">EVENT</th>
-            <th className="text-center w-24">STATUS</th>
-            <th className="text-center">CODE</th>
-            <th className="text-center w-64">ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            attendances.map((attendance) => (
-              <AttendanceRow
-                id={attendance.id}
-                first_name={attendance.first_name}
-                last_name={attendance.last_name}
-                username={attendance.username}
-                profile_url={attendance.profile_url}
-                event_name={attendance.event_name}
-                event_category={attendance.event_category}
-                event_color={attendance.event_color}
-                event_date={attendance.event_date}
-                status={attendance.status}
-                code={attendance.code}
-              />
-            ))
-          }
-        </tbody>
-      </table>
+      <AdminAttendancesTable 
+        attendances={filteredAttendances}
+        onClearFilters={handleClearFilters}
+        onMarkAttended={handleMarkAttended}
+        onDelete={handleDelete}
+      />
     </div>
   );
 }
 
-export default AttendancesPage;
+export default AttendancesPage;
