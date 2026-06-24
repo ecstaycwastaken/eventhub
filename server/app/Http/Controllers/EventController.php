@@ -494,6 +494,7 @@ class EventController extends Controller
                 'total_registered' => $total_registered,
                 'total_checked_in' => $total_attended,
                 'total_capacity' => $event->capacity,
+                'total_available' => $event->capacity - $total_registered
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['message' => 'Event not found.'], 404);
@@ -501,6 +502,86 @@ class EventController extends Controller
             Log::error('Error fetching attendance by event: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An unexpected error occurred while fetching attendance data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
+        }
+    }
+
+    public function deleteAttendanceById(Request $request, string $id) {
+        try {
+            // Use the unique 'code' column since the table does not have an 'id' primary key
+            $attendance = EventAttendance::where('code', $id)->firstOrFail();
+
+            // Check if the authenticated user is the host of the event
+            $user = $request->user();
+            $event = Event::findOrFail($attendance->event_id);
+            $isHost = $event->isHost($user->id);
+
+            // Allow deletion if the user is the host or has an admin role
+            $authorized = $isHost || $user->role === 'admin';
+            if (!$authorized) {
+                return response()->json(['message' => 'Unauthorized. Only the event host or admin can delete this attendance.'], 403);
+            }
+
+            // Delete the attendance record using the unique code instead of Eloquent's default 'id' primary key
+            EventAttendance::where('code', $attendance->code)->delete();
+
+            return response()->json(['message' => 'Attendance deleted successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Attendance record not found.'], 404);
+        } catch (\Exception $e) {
+            Log::error('Error deleting attendance by ID: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An unexpected error occurred while deleting attendance.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
+        }
+    }
+
+    public function getAllEventsAttendances() {
+        try {
+            // Fetch all events (admin only) along with their attendees and attendance status
+            $events = Event::with(['category', 'eventAttendances' => function($query) {
+                    $query->where('status', '<>', 'host')->with('user');
+                }])
+                ->get();
+
+            // Build the attendance data for each event
+            $eventsData = $events->map(function($event) {
+                return [
+                    'event_id' => $event->id,
+                    'title' => $event->title,
+                    'date' => $event->date,
+                    'venue' => $event->venue,
+                    'capacity' => $event->capacity,
+                    'category' => $event->category ? $event->category->name : 'Uncategorized',
+                    'color' => $event->category ? $event->category->color : '#000000',
+                    'attendees' => $event->eventAttendances->map(function($attendance) {
+                        return [
+                            'id' => $attendance->id,
+                            'user_id' => $attendance->user_id,
+                            'first_name' => $attendance->user->first_name,
+                            'last_name' => $attendance->user->last_name,
+                            'username' => $attendance->user->username,
+                            'profile_url' => $attendance->user->profile_url,
+                            'full_name' => $attendance->user->getFullNameAttribute(),
+                            'status' => $attendance->status,
+                            'code' => $attendance->code,
+                            'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json([
+                'has_events' => !$eventsData->isEmpty(),
+                'events_attendance_data' => $eventsData,
+                'total_events' => $eventsData->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching all events attendances: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An unexpected error occurred while fetching all events attendances.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
             ], 500);
         }

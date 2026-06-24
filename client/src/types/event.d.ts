@@ -31,3 +31,20 @@ export interface EventCreationFormData {
     price: string;
     ticketType: "Free" | "Paid";
 }
+
+export interface Attendance {
+    user_id: string;
+    full_name: string;
+    status: "host" | "attended" | "registered";
+    code: string;
+    checked_in_at?: string;
+}
+
+export interface EventsWithAttendance {
+    event_id: string;
+    title: string;
+    date: string;
+    venue: string;
+    capacity: number;
+    attendees: Attendance[];
+}

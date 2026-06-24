@@ -6,8 +6,8 @@ interface AdminAttendancesTableProps {
   loading?: boolean;
   error?: { message?: string } | null;
   onClearFilters: () => void;
-  onMarkAttended?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onMarkAttended?: (attendance: AttendanceDetails) => void;
+  onDelete?: (id: string) => void;
 }
 
 export default function AdminAttendancesTable({
