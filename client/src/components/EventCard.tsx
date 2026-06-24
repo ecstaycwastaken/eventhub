@@ -1,26 +1,10 @@
-import heroBG from '../assets/hero-bg.png'
-import Button from './Button'
-import { FiCalendar, FiMapPin } from 'react-icons/fi'
-
-export interface EventItem {
-  id: string
-  user_id: string
-  title: string
-  description: string
-  date: string
-  venue: string
-  capacity: number
-  price: string
-  banner_image: string | null
-  category: {
-    id: string
-    name: string
-    color: string
-  }
-}
+import heroBG from '../assets/hero-bg.png';
+import Button from './Button';
+import { FiCalendar, FiMapPin } from 'react-icons/fi';
+import type { EventWithCategory } from "@/types/event";
 
 interface EventCardProps {
-  event: EventItem
+  event: EventWithCategory
 }
 
 function EventCard({ event }: EventCardProps) {
@@ -41,7 +25,7 @@ function EventCard({ event }: EventCardProps) {
   })
 
   return (
-    <div className="overflow-hidden w-md rounded-2xl border border-border-gray bg-white shadow-sm">
+    <div className="overflow-hidden w-full rounded-2xl border border-border-gray bg-white shadow-sm">
       <div className="relative h-60 w-full overflow-hidden rounded-t-2xl">
         <img
           src={event.banner_image || heroBG}

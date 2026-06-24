@@ -35,12 +35,12 @@ export function EventHero({ greeting, mainTitle, subTitle }: EventHeroProps) {
           </p>
         )}
 
-        <div className="mx-auto mt-10 flex max-w-xl items-center gap-2 rounded-xl bg-white p-2 shadow">
+        <div className="mx-auto mt-10 flex max-w-xl flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-xl bg-white p-2 shadow">
           <input
             className="min-w-0 flex-1 rounded-lg px-4 py-3 outline-none"
             placeholder="Search events, workshops, meetups..."
           />
-          <Button bgColorClass="bg-brand-red" className="shrink-0 rounded-lg px-4 py-3 sm:px-6 text-white">
+          <Button bgColorClass="bg-brand-red" className="shrink-0 rounded-lg px-4 py-3 sm:px-6 text-white w-full sm:w-auto">
             Search
           </Button>
         </div>

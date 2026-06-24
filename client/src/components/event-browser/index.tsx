@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useHttp } from '@/hooks/useHttp';
-import type { EventItem } from '@/components/EventCard';
+import { EventCategories } from './EventCategories';
 import { EventHero } from './EventHero';
 import { EventStats } from './EventStats';
-import { EventCategories, type CategoryItem } from './EventCategories';
 import { EventList } from './EventList';
 import { EventFooter } from './EventFooter';
+import type { EventWithCategory } from "@/types/event";
+import type { Category } from "@/types/category";
+import type { GetAllEventsResponse } from "@/types/response";
 
 interface EventBrowserProps {
   greeting?: string;
@@ -14,46 +17,60 @@ interface EventBrowserProps {
   showStats?: boolean;
 }
 
-interface EventResponse {
-  events?: EventItem[];
-}
-
 export default function EventBrowser({
   greeting,
   mainTitle,
   subTitle,
   showStats = false,
 }: EventBrowserProps) {
-  const { data, loading, error, sendRequest } = useHttp<EventItem[] | EventResponse>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { 
+    data: getAllEventsData, 
+    loading: getAllEventsLoading, 
+    error: getAllEventsError, 
+    sendRequest: getAllEvents 
+  } = useHttp<GetAllEventsResponse>();
+  const {
+    data: getAllCategoriesData,
+    loading: getAllCategoriesLoading,
+    error: getAllCategoriesError,
+    sendRequest: getAllCategories
+  } = useHttp<Category[]>();
+
+  const category = searchParams.get('category')?.toLowerCase() || null;
 
   useEffect(() => {
-    sendRequest({
+    getAllEvents({
       method: 'GET',
-      url: '/api/v1/event',
+      url: `/api/v1/event?category=${category || ''}`,
     });
-  }, [sendRequest]);
+  }, [getAllEvents, category]);
+
+  useEffect(() => {
+    getAllCategories({
+      method: 'GET',
+      url: '/api/v1/categories',
+    });
+  }, [getAllCategories]);
 
   // Handle the response which could be an array or an object with an events property
-  const events: EventItem[] = useMemo(() => {
-    if (!data) return [];
-    return Array.isArray(data) ? data : (data.events || []);
-  }, [data]);
+  const events: EventWithCategory[] = useMemo(() => {
+    if (!getAllEventsData) return [];
+    console.log('Received data:', getAllEventsData);
+    return Array.isArray(getAllEventsData) ? getAllEventsData : (getAllEventsData.events || []);
+  }, [getAllEventsData]);
 
   const totalEvents = events.length;
   
-  const categories: CategoryItem[] = useMemo(() => {
-    const defaultCategories: CategoryItem[] = [
+  const categories: Category[] = useMemo(() => {
+    const defaultCategories: Category[] = [
       { id: 'all', name: 'All', color: '#000000' },
     ];
-    
-    if (events.length === 0) return defaultCategories;
 
-    const uniqueCategories = Array.from(
-      new Map(events.map((event) => [event.category.id, event.category])).values()
-    );
+    if (!getAllCategoriesData) return defaultCategories;
 
-    return [...defaultCategories, ...uniqueCategories];
-  }, [events]);
+    return [...defaultCategories, ...getAllCategoriesData];
+  }, [getAllCategoriesData]);
 
   const totalCategories = Math.max(0, categories.length - 1); // Exclude 'All'
 
@@ -65,9 +82,19 @@ export default function EventBrowser({
         <EventStats totalEvents={totalEvents} totalCategories={totalCategories} />
       )}
 
-      <div className="flex flex-col items-center gap-4 pb-16">
-        <EventCategories categories={categories} />
-        <EventList events={events} loading={loading} error={error?.message || null} />
+      <div className="w-full flex flex-col items-center gap-4 pb-16">
+        {!getAllCategoriesLoading && getAllCategoriesError ? (
+          <p className="col-span-full text-center text-red-500">
+            Failed to load categories.
+          </p>
+        ) : (
+          <EventCategories 
+            categories={categories}
+            searchParams={searchParams}
+            setSearchParams={setSearchParams}
+          />
+        )}
+        <EventList events={events} loading={getAllEventsLoading} error={getAllEventsError?.message || null} />
         <EventFooter />
       </div>
     </section>
