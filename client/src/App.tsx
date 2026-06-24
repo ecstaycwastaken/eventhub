@@ -14,15 +14,16 @@ import AdminLayout from "./layouts/AdminLayout";
 import HomeLayout from "./layouts/HomeLayout";
 
 
-import LandingPage from "@/pages/public/LandingPage"
+import LandingPage from "@/pages/public/LandingPage";
 
-import HomePage from "@/pages/private/HomePage"
-import MyEventsPage from "@/pages/private/MyEventsPage"
+import HomePage from "@/pages/private/HomePage";
+import EventFormPage from "@/pages/private/EventFormPage";
+import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
+import MyEventsPage from "@/pages/private/MyEventsPage";
 
-import AdminUsers from "./pages/private/AdminUsers";
-
-import AdminDashboardPage from "./pages/private/admin/DashboardPage";
-import AdminEventsPage from "./pages/private/admin/EventsPage";
+import AdminUsers from "@/pages/private/AdminUsers";
+import AdminDashboardPage from "@/pages/private/admin/DashboardPage";
+import AdminEventsPage from "@/pages/private/admin/EventsPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -44,7 +45,9 @@ const router = createBrowserRouter(
       <Route element={<AuthGuard />}>
         <Route path='/home' element={<HomeLayout />}>
           <Route path='events' element={<HomePage />} />
+          <Route path='my-registrations' element={<MyRegistrationsPage />} />
           <Route path='my-events' element={<MyEventsPage />} />
+          <Route path='my-events/create-event' element={<EventFormPage />} />
         </Route>
       </Route>
     </>
