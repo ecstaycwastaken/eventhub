@@ -1,7 +1,7 @@
-import type { EventFormData } from "./EventCreationForm";
+import type { EventCreationFormData } from "@/types/event";
 
 function TicketsSection({ formData, handleChange }: { 
-    formData: EventFormData; 
+    formData: EventCreationFormData; 
     handleChange: (field: string, value: string | number) => void; 
 }) {
   return (

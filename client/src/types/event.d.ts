@@ -18,3 +18,15 @@ export interface Event {
 export interface EventWithCategory extends Event {
     category: Category;
 }
+
+export interface EventCreationFormData {
+    title: string;
+    description: string;
+    categoryId: string | null;
+    eventDate: string;
+    eventTime: string;
+    venue: string;
+    capacity: string;
+    price: string;
+    ticketType: "Free" | "Paid";
+}
