@@ -131,6 +131,8 @@ class AuthController extends Controller
                 sameSite: 'Lax'
             );
 
+            $role = User::where('id', $supabaseUser['user']['id'])->value('role');
+
             // Build user data
             $user = [
                 "id" => $supabaseUser['user']['id'],
@@ -138,7 +140,8 @@ class AuthController extends Controller
                 "username" => $supabaseUser['user']['user_metadata']['username'] ?? null,
                 "first_name" => $supabaseUser['user']['user_metadata']['first_name'],
                 "last_name" => $supabaseUser['user']['user_metadata']['last_name'],
-                "profile_image" => $supabaseUser['user']['user_metadata']['profile_image']
+                "profile_image" => $supabaseUser['user']['user_metadata']['profile_image'],
+                "role" => $role ?? 'user',
             ];
 
             return response()->json([
