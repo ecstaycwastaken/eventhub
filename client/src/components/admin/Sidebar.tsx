@@ -22,7 +22,7 @@ function Sidebar({ collapsed }: SidebarProps) {
       <nav className="flex flex-col px-3 gap-2">
         <SidebarLink path="/admin" icon={FaChartSimple} label="Dashboard" collapsed={collapsed} />
         <SidebarLink path="/admin/events" icon={FaCalendar} label="Events" collapsed={collapsed} />
-        <SidebarLink path="#" icon={FaUser} label="Users" collapsed={collapsed} />
+        <SidebarLink path="/admin/users" icon={FaUser} label="Users" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaUserCheck} label="Attendances" collapsed={collapsed} />
         <SidebarLink path="#" icon={FaTags} label="Categories" collapsed={collapsed} />
       </nav>

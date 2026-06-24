@@ -18,6 +18,9 @@ import LandingPage from "@/pages/public/LandingPage"
 
 import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"
+
+import AdminUsers from "./pages/private/AdminUsers";
+
 import AdminDashboardPage from "./pages/private/admin/DashboardPage";
 import AdminEventsPage from "./pages/private/admin/EventsPage";
 
@@ -28,6 +31,7 @@ const router = createBrowserRouter(
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
+          <Route path="users" element={<AdminUsers />} />
         </Route>
       </Route>
 
