@@ -1,8 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\UserController;
 
 Route::prefix('v1')->group(function () {
     // Public routes that do not require authentication
@@ -13,8 +16,15 @@ Route::prefix('v1')->group(function () {
     });
     
     Route::group(['prefix' => 'auth'], function () {
+        // Public auth routes
         Route::post('/signup', [AuthController::class, 'signup'])->name('auth.signup');
         Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+        
+        // Protected auth routes
+        Route::middleware(['supabase.auth'])->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+            Route::get('/me', [AuthController::class, 'getAuthenticatedUser'])->name('auth.me');
+        });
     });
 
     Route::group(['prefix' => 'event'], function () {
@@ -35,5 +45,29 @@ Route::prefix('v1')->group(function () {
         Route::get('/attendance/{id}', [EventController::class, 'getEventAttendance'])->name('events.attendance');
         Route::get('/my-events/report', [EventController::class, 'getEventsReport'])->name('events.events-report');
         Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
+    });
+
+    Route::middleware(['supabase.auth'])->prefix('user')->group(function () {
+        Route::get('/me', [UserController::class, 'getMyProfile'])->name('users.profile');
+        Route::put('/edit/{id}', [UserController::class, 'editUser'])->name('users.edit');
+
+        // Admin-only user management routes
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/', [UserController::class, 'getAllUsers'])->name('users.all');
+            Route::get('/{id}', [UserController::class, 'getUserById'])->name('users.details');
+            Route::delete('/{id}', [UserController::class, 'deleteUser'])->name('users.delete');
+        });
+    });
+
+    // Strictly for admin users
+    Route::middleware(['supabase.auth', 'role:admin'])->prefix('categories')->group(function () {
+        Route::post('/', [CategoryController::class, 'createCategory'])->name('categories.create');
+        Route::get('/', [CategoryController::class, 'getAllCategories'])->name('categories.read');
+        Route::put('/{id}', [CategoryController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('/{id}', [CategoryController::class, 'deleteCategory'])->name('categories.delete');
+    });
+
+    Route::middleware(['supabase.auth', 'role:admin'])->prefix('admin')->group(function () {
+        Route::get('/overview', [AdminController::class, 'getSiteOverview'])->name('admin.overview');
     });
 });

@@ -1,71 +1,62 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6"
-import Button from "@/components/Button"
-import { useAuth } from "@/context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import Button from "@/components/Button";
+import { useAuth } from "@/hooks/useAuth";
+import { useHttp } from "@/hooks/useHttp";
+import type { AuthResponse } from "@/types/response";
 
 function SignInForm({ onClose }: { onClose?: () => void }) {
-    const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [showPassword, setShowPassword] = useState(false);
 
-    const { login } = useAuth()
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { updateAuthState } = useAuth();
+    const { sendRequest, loading: isLoading, error } = useHttp<AuthResponse>();
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev)
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setIsLoading(true)
-        setError(null)
 
         const formData = new FormData(e.currentTarget)
         const email = formData.get('email')
         const password = formData.get('password')
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+            const response = await sendRequest({
+                url: '/api/v1/auth/login',
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            })
+                data: { email, password }
+            });
 
-            const data = await response.json()
+            if (!response || !response.data) return;
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to sign in. Please check your credentials.')
-            }
+            const data = response.data;
 
-            login(data.user, data.access_token)
+            updateAuthState(data.user);
 
-            const firstName = data.user?.first_name || 'User';
+            const firstName = data.user?.first_name || data.user?.username || 'User';
             toast.success(`Welcome back, ${firstName} !`, {
                 classNames: {
                     toast:  'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
                 }
-            })
-            
-            if (onClose) onClose()
-            
-            navigate('/home')
+            });
 
-        }catch (err: any) {
-            setError(err.message)
-        }finally {
-            setIsLoading(false)
+            if (onClose) onClose();
+            navigate('/home');
+        } catch (err: unknown) {
+            // Error handled by useHttp hook
+            console.error('Login failed:', err);
         }
     }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col animate-in fade-in duration-300">
 
-        {error && (
+        {error && error.message && (
             <div className="w-full p-3 text-sm text-red-500 border border-red-200 bg-red-50 rounded-xl -mt-5 mb-5">
-                {error}
+                {error.message}
             </div>
         )}
 
@@ -105,7 +96,7 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
 
         <Button
             bgColorClass="bg-brand-red"
-            className="text-button-md py-3 rounded-xl"
+            className={`text-button-md py-3 rounded-xl ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             type="submit"
             disabled={isLoading}
         >

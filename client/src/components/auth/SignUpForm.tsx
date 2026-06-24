@@ -1,60 +1,53 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import Button from "@/components/Button"
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { FaArrowRight } from "react-icons/fa";
+import { useHttp } from "@/hooks/useHttp";
+import type { AuthResponse } from "@/types/response";
 
 function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
-    const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [showPassword, setShowPassword] = useState(false);
 
-    const togglePasswordVisibility = () => setShowPassword((prev) => !prev)
+    const { sendRequest, loading: isLoading, error } = useHttp<AuthResponse>();
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsLoading(true)
-        setError(null)
+    const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
-        const formData = new FormData(e.currentTarget)
-        const payload = Object.fromEntries(formData.entries())
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.currentTarget);
+        const payload = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/v1/auth/signup', {
+            const response = await sendRequest({
+                url: '/api/v1/auth/signup',
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(payload)
-            })
+                data: payload
+            });
 
-            const data = await response.json()
+            if (!response || !response.data) return;
 
-            if (!response.ok) {
-                if (data.errors) {
-                    const firstError = Object.values(data.errors)[0] as string[]
-                    throw new Error(firstError[0])
+            toast.success(`Registration successful! Please log in.`, {
+                classNames: {
+                    toast:  'bg-[#F1FFEB] text-[#44A872] font-dm font-medium rounded-xl border border-[#44A872]'
                 }
-                throw new Error(data.message || 'Registration failed.')
-            }
+            });
 
-            console.log("Registration successful!", data)
+            if (onSuccess) onSuccess();
 
-            if (onSuccess) onSuccess()
-
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
+        } catch (err: unknown) {
+            // Error handled by useHttp hook
+            console.error('Registration failed:', err);
         }
     }
     
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 items-center animate-in fade-in duration-300">
 
-        {error && (
+        {error && error.message && (
             <div className="w-full p-3 text-sm text-red-500 border border-red-200 bg-red-50 rounded-xl">
-                {error}
+                {error.message}
             </div>
         )}
 
@@ -189,7 +182,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
 
         <Button
             bgColorClass="bg-brand-red"
-            className="text-button-md py-3 rounded-xl w-full flex justify-center items-center gap-1"
+            className={`text-button-md py-3 rounded-xl w-full flex justify-center items-center gap-1 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             type="submit"
             disabled={isLoading}
         >

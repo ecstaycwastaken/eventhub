@@ -7,7 +7,7 @@ import {
 import { Toaster } from 'sonner';
 
 import AuthGuard from "@/components/auth/AuthGuard"
-import AuthProvider from "@/context/AuthContext";
+import AuthProvider from "@/context/auth/AuthProvider";
 
 import LandingLayout from "@/layouts/LadingLayout"
 import AdminLayout from "./layouts/AdminLayout";
