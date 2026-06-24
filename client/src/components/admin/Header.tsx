@@ -1,4 +1,5 @@
 import { FaBars } from "react-icons/fa";
+import logoImg from '@/assets/logo.png';
 
 interface HeaderProps {
     collapsed: boolean,
@@ -12,7 +13,9 @@ function Header({ collapsed, setCollapsed }: HeaderProps) {
                 <FaBars />
             </button>
 
-            <h1 className="ml-4">Admin Dashboard</h1>
+            <div className="ml-4">
+                <img className="h-7" src={logoImg} alt="EventHub Logo" />
+            </div>
         </header>
     )
 }

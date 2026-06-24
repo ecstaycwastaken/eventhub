@@ -9,7 +9,7 @@ import { Toaster } from 'sonner';
 import AuthGuard from "@/components/auth/AuthGuard"
 import AuthProvider from "@/context/auth/AuthProvider";
 
-import LandingLayout from "@/layouts/LadingLayout"
+import LandingLayout from "@/layouts/LandingLayout"
 import AdminLayout from "./layouts/AdminLayout";
 import HomeLayout from "./layouts/HomeLayout";
 
@@ -18,15 +18,21 @@ import LandingPage from "@/pages/public/LandingPage"
 
 import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"
-import AdminPage from "./pages/private/AdminPage";
-import AdminEvents from "./pages/private/AdminEvents";
+
+import AdminUsers from "./pages/private/AdminUsers";
+
+import AdminDashboardPage from "./pages/private/admin/DashboardPage";
+import AdminEventsPage from "./pages/private/admin/EventsPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path='/admin' element={<AdminLayout />}>
-        <Route index element={<AdminPage />} />
-        <Route path="events" element={<AdminEvents />} />
+      <Route element={<AuthGuard />}>
+        <Route path='/admin' element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="events" element={<AdminEventsPage />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
       </Route>
 
       {/* Public Routes */}

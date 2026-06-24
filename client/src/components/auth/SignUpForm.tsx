@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import Button from "@/components/Button"
+import { Spinner } from "@/components/ui/spinner";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { FaArrowRight } from "react-icons/fa";
 import { useHttp } from "@/hooks/useHttp";
@@ -182,12 +183,15 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
 
         <Button
             bgColorClass="bg-brand-red"
-            className={`text-button-md py-3 rounded-xl w-full flex justify-center items-center gap-1 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`text-button-md py-3 rounded-xl w-full flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             type="submit"
             disabled={isLoading}
         >
             {isLoading ? (
-                'Creating Account...' 
+                <>
+                    <Spinner size="xs" variant="white" />
+                    <span>Creating Account...</span>
+                </>
             ) : (
                 <>Create Account <FaArrowRight /></>
             )}
