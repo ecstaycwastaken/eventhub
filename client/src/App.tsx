@@ -15,6 +15,8 @@ import HomeLayout from "./layouts/HomeLayout";
 
 
 import LandingPage from "@/pages/public/LandingPage"
+import UnauthorizedPage from "@/pages/public/UnauthorizedPage"
+import NotFoundPage from "@/pages/public/NotFoundPage"
 
 import HomePage from "@/pages/private/HomePage"
 import MyEventsPage from "@/pages/private/MyEventsPage"
@@ -27,7 +29,23 @@ import AdminEventsPage from "./pages/private/admin/EventsPage";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route element={<AuthGuard />}>
+      {/* Public Routes */}
+      <Route path='/' element={<LandingLayout />}>
+        <Route index element={<LandingPage />} />
+      </Route>
+
+      <Route path='/unauthorized' element={<UnauthorizedPage />} />
+
+      {/* Private Routes */}
+      <Route element={<AuthGuard type="user" />}>
+        <Route path='/home' element={<HomeLayout />}>
+          <Route path='events' element={<HomePage />} />
+          <Route path='my-events' element={<MyEventsPage />} />
+        </Route>
+      </Route>
+
+      {/* Admin Routes */}
+      <Route element={<AuthGuard type="admin" />}>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<AdminEventsPage />} />
@@ -35,18 +53,8 @@ const router = createBrowserRouter(
         </Route>
       </Route>
 
-      {/* Public Routes */}
-      <Route path='/' element={<LandingLayout />}>
-        <Route index element={<LandingPage />} />
-      </Route>
-
-      {/* Private Routes */}
-      <Route element={<AuthGuard />}>
-        <Route path='/home' element={<HomeLayout />}>
-          <Route path='events' element={<HomePage />} />
-          <Route path='my-events' element={<MyEventsPage />} />
-        </Route>
-      </Route>
+      {/* Wildcard 404 Route */}
+      <Route path='*' element={<NotFoundPage />} />
     </>
   )
 )
