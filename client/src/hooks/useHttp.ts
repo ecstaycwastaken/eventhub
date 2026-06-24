@@ -66,3 +66,5 @@ export function useHttp<T>() {
 
     return { data, error, loading, sendRequest, reset };
 }
+
+export default useHttp;
