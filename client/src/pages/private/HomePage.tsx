@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import EventBrowser from "@/components/EventBrowser"
+import EventBrowser from "@/components/event-browser"
 
 const HomePage = () => {
   const { user } = useAuth()

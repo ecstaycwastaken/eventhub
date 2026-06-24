@@ -1,4 +1,4 @@
-import EventBrowser from "@/components/EventBrowser"
+import EventBrowser from "@/components/event-browser"
 
 const LandingPage = () => {
   return (
