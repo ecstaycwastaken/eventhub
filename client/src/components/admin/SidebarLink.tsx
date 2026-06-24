@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 interface SidebarLinkProps {
   label: string,
@@ -10,14 +10,36 @@ interface SidebarLinkProps {
 
 function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
   const Icon = icon; 
+  const { pathname } = useLocation();
+
+  // Normalize pathnames by removing trailing slash for consistent matching
+  const normalizedPath = path.replace(/\/$/, "");
+  const normalizedCurrent = pathname.replace(/\/$/, "");
+  const isActive = path !== '#' && normalizedCurrent === normalizedPath;
 
   return (
-    <NavLink to={path} className='w-full flex items-center px-4 py-3 hover:bg-gray-200'>
-      <Icon size={20}/>
+    <NavLink 
+      to={path} 
+      onClick={(e) => {
+        if (path === '#') {
+          e.preventDefault();
+        }
+      }}
+      className={`
+        flex items-center px-3 py-2.5 rounded-md text-[15px] font-medium transition-colors
+        ${isActive 
+          ? "bg-primary text-white" 
+          : "text-text-secondary hover:text-ink hover:bg-bg-subtle"
+        }
+        ${collapsed ? "justify-center" : "justify-start"}
+      `}
+      title={collapsed ? label : undefined}
+    >
+      <Icon size={18} className="shrink-0" />
       <span
         className={`
-          ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 text-left
-          ${collapsed ? "w-0 opacity-0" : "w-32 opacity-100"}
+          whitespace-nowrap overflow-hidden transition-all duration-300
+          ${collapsed ? "w-0 opacity-0 ml-0" : "w-full opacity-100 ml-3"}
         `}
       >
         {label}

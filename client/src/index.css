@@ -91,4 +91,59 @@
     --color-border-yellow: #FEE685;
     --color-border-card: #C2C2C2;
     --color-border-gray: #E5E7EB;
+
+    /* DESIGN.md Tokens */
+    --color-primary: #E63946;
+    --color-primary-hover: #D62E3C;
+    --color-primary-active: #C5232F;
+    --color-ink: #111111;
+    --color-action-secondary: #2F5FDB;
+    --color-bg-page: #FFFFFF;
+    --color-bg-subtle: #F5F5F6;
+    --color-bg-dark-band: #18181B;
+    --color-border: #E5E5E7;
+    --color-border-strong: #D4D4D8;
+    --color-text-primary: #111111;
+    --color-text-secondary: #6B7280;
+    --color-text-muted: #9CA3AF;
+    --color-success: #059669;
+    --color-success-bg: #C3E9D2;
+    --color-success-text: #15803D;
+    --color-warning-bg: #FEF3C7;
+    --color-warning-border: #F59E0B;
+    --color-warning-text: #92400E;
+    --color-danger: #DC2626;
+
+    --gradient-brand-start: #681A20;
+    --gradient-brand-end: #9E2A33;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+
+    --shadow-resting: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    --shadow-raised: 0 4px 12px rgba(16,24,40,0.12);
+    --shadow-overlay: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong, #D4D4D8);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted, #9CA3AF);
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong, #D4D4D8) transparent;
+  }
 }
