@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext';
 import { useHttp } from '@/hooks/useHttp';
 import type { User } from '@/types/user';
 import type { AuthResponse } from '@/types/response';
+import { Spinner } from '@/components/ui/spinner';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -59,7 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, user, updateAuthState, logout }}>
-            {!isLoading ? children : <div className="flex h-screen items-center justify-center">Loading...</div>}
+            {!isLoading ? children : (
+                <div className="flex h-screen flex-col items-center justify-center bg-bg-page gap-4">
+                    <Spinner size="lg" variant="primary" />
+                    <p className="text-text-secondary font-medium animate-pulse">Initializing app...</p>
+                </div>
+            )}
         </AuthContext.Provider>
     );
 }
