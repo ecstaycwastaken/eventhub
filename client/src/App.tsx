@@ -18,8 +18,10 @@ import LandingPage from "@/pages/public/LandingPage"
 import UnauthorizedPage from "@/pages/public/UnauthorizedPage"
 import NotFoundPage from "@/pages/public/NotFoundPage"
 
-import HomePage from "@/pages/private/HomePage"
-import MyEventsPage from "@/pages/private/MyEventsPage"
+import HomePage from "@/pages/private/HomePage";
+import EventFormPage from "@/pages/private/EventFormPage";
+import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
+import MyEventsPage from "@/pages/private/MyEventsPage";
 
 import AdminUsers from "./pages/private/AdminUsers";
 
@@ -41,7 +43,9 @@ const router = createBrowserRouter(
       <Route element={<AuthGuard type="user" />}>
         <Route path='/home' element={<HomeLayout />}>
           <Route path='events' element={<HomePage />} />
+          <Route path='my-registrations' element={<MyRegistrationsPage />} />
           <Route path='my-events' element={<MyEventsPage />} />
+          <Route path='my-events/create-event' element={<EventFormPage />} />
         </Route>
       </Route>
 

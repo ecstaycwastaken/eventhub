@@ -33,7 +33,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
               </NavLink>
 
               <NavLink
-                to='/home/registrations'
+                to='/home/my-registrations'
                 className={({ isActive }: { isActive: boolean }) => `px-5 py-2 text-sm font-semibold rounded-full transition-colors 
                 ${isActive ? 'bg-brand-red text-white' : 'text-gray-500 hover:text-gray-900 cursor-pointer'}`}
               >
