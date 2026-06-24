@@ -45,7 +45,7 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
             });
 
             if (onClose) onClose();
-            navigate('/home');
+            navigate('/home/events');
         } catch (err: unknown) {
             // Error handled by useHttp hook
             console.error('Login failed:', err);
