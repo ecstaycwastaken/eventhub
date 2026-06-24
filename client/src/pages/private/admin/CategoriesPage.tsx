@@ -2,11 +2,11 @@ import type { CategoryInfo } from "@/components/admin/CategoryCard";
 import CategoryCard from "@/components/admin/CategoryCard";
 import Button from "@/components/Button";
 import { useState } from "react";
-import { FaPlus, FaSquare } from "react-icons/fa";
-import { LuPlus, LuTag } from "react-icons/lu";
+import { FaPlus } from "react-icons/fa";
+import { LuPlus } from "react-icons/lu";
 
 function CategoriesPage() {
-  const [categories, setCategories] = useState<CategoryInfo[]>([
+  const [categories, _setCategories] = useState<CategoryInfo[]>([
     {
       name: "Music",
       hexcode: "#a21caf",
