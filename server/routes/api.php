@@ -16,8 +16,15 @@ Route::prefix('v1')->group(function () {
     });
     
     Route::group(['prefix' => 'auth'], function () {
+        // Public auth routes
         Route::post('/signup', [AuthController::class, 'signup'])->name('auth.signup');
         Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+        
+        // Protected auth routes
+        Route::middleware(['supabase.auth'])->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+            Route::get('/me', [AuthController::class, 'getAuthenticatedUser'])->name('auth.me');
+        });
     });
 
     Route::group(['prefix' => 'event'], function () {

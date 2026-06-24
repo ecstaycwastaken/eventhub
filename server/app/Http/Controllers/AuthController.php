@@ -9,8 +9,7 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function signup(Request $request)
-    {
+    public function signup(Request $request) {
         try {
             $request->validate([
                 'username' => 'required|string|unique:users',
@@ -92,8 +91,7 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request) {
         try {
             $request->validate([
                 'email' => 'required|string|email',
@@ -121,7 +119,17 @@ class AuthController extends Controller
 
             $supabaseUser = $response->json();
 
-            $cookie = cookie('access_token', $supabaseUser['access_token'], 60 * 24 * 7); // Set cookie for 7 days
+            $cookie = cookie(
+                name: 'access_token',
+                value: $supabaseUser['access_token'],
+                minutes: 60 * 24,
+                path: '/',
+                domain: null,
+                secure: false, // Set to true if using HTTPS
+                httpOnly: true,
+                raw: false,
+                sameSite: 'Lax'
+            );
 
             // Build user data
             $user = [
@@ -143,6 +151,53 @@ class AuthController extends Controller
             Log::error('Login error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'An unexpected error occurred during login. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
+        }
+    }
+
+    public function getAuthenticatedUser(Request $request) {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not authenticated.'
+                ], 401);
+            }
+
+            return response()->json([
+                'message' => 'Successfully retrieved user profile.',
+                'user' => $user
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get profile error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An unexpected error occurred while retrieving the user profile. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
+        }
+    }
+    
+    public function logout() {
+        try {
+            $cookie = cookie(
+                name: 'access_token',
+                value: '',
+                minutes: -1,
+                path: '/',
+                domain: null,
+                secure: false,
+                httpOnly: true,
+                raw: false,
+                sameSite: 'Lax'
+            );
+            return response()->json([
+                'message' => 'Successfully logged out!'
+            ], 200)->withCookie($cookie);
+        } catch (\Exception $e) {
+            Log::error('Logout error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An unexpected error occurred during logout. Please try again later.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
             ], 500);
         }
