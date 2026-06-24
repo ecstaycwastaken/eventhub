@@ -14,13 +14,34 @@ ChartJS.register(
   Legend
 );
 
-const EventsByCategoryChart = () => {
-  const categories = [
-    { name: 'Music', count: 1, color: '#2F5FDB', bgClass: 'bg-action-secondary' },
-    { name: 'Technology', count: 1, color: '#8B5CF6', bgClass: 'bg-[#8B5CF6]' },
-    { name: 'Sports', count: 1, color: '#0D9488', bgClass: 'bg-[#0D9488]' },
-    { name: 'Arts & Culture', count: 1, color: '#D97706', bgClass: 'bg-[#D97706]' },
-  ];
+export interface EventsByCategoryChartProps {
+  eventsByCategory: {
+    category_id: number;
+    category_name: string | null;
+    event_count: number;
+  }[];
+}
+
+const colorPalette = [
+  { color: '#2F5FDB', bgClass: 'bg-action-secondary' }, // Blue
+  { color: '#8B5CF6', bgClass: 'bg-[#8B5CF6]' }, // Purple
+  { color: '#0D9488', bgClass: 'bg-[#0D9488]' }, // Teal
+  { color: '#D97706', bgClass: 'bg-[#D97706]' }, // Orange
+  { color: '#E11D48', bgClass: 'bg-[#E11D48]' }, // Rose
+  { color: '#4ADE80', bgClass: 'bg-[#4ADE80]' }, // Green
+];
+
+const EventsByCategoryChart = ({ eventsByCategory }: EventsByCategoryChartProps) => {
+  const safeEventsByCategory = eventsByCategory || [];
+  const categories = safeEventsByCategory.map((c, index) => {
+    const palette = colorPalette[index % colorPalette.length];
+    return {
+      name: c.category_name || 'Uncategorized',
+      count: c.event_count,
+      color: palette.color,
+      bgClass: palette.bgClass,
+    };
+  });
 
   const totalCategoryEvents = categories.reduce((sum, c) => sum + c.count, 0);
 
@@ -60,19 +81,23 @@ const EventsByCategoryChart = () => {
       </div>
       <div className="flex-1 flex flex-col items-center justify-between min-h-0 mt-1">
         <div className="w-24 h-24 relative shrink-0 flex items-center justify-center">
-          <Doughnut options={donutChartOptions} data={donutChartData} />
+          {categories.length > 0 ? (
+            <Doughnut options={donutChartOptions} data={donutChartData} />
+          ) : (
+             <div className="w-full h-full rounded-full border-4 border-gray-100 flex items-center justify-center"></div>
+          )}
           <div className="absolute flex flex-col items-center justify-center pointer-events-none">
             <span className="text-lg font-bold text-ink leading-none">{totalCategoryEvents}</span>
             <span className="text-[8px] uppercase tracking-wider text-text-secondary mt-0.5 leading-none">Total</span>
           </div>
         </div>
         
-        <div className="w-full mt-2 overflow-y-auto max-h-32 pr-1 px-1" style={{ scrollbarWidth: 'thin' }}>
+        <div className="w-full mt-2 overflow-y-auto custom-scrollbar max-h-32 pr-1 px-1">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-border/80 text-[9px] uppercase font-bold tracking-wider text-text-secondary/80">
                 <th className="pb-1 font-bold">Category</th>
-                <th className="pb-1 text-right font-bold">Active Events</th>
+                <th className="pb-1 text-right font-bold">Events</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
@@ -80,11 +105,16 @@ const EventsByCategoryChart = () => {
                 <tr key={c.name} className="hover:bg-bg-subtle/50 transition-colors group">
                   <td className="py-1 font-medium text-ink flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${c.bgClass} shrink-0`}></span>
-                    {c.name}
+                    <span className="truncate max-w-[100px] block" title={c.name}>{c.name}</span>
                   </td>
                   <td className="py-1 text-right font-semibold text-text-secondary">{c.count}</td>
                 </tr>
               ))}
+              {categories.length === 0 && (
+                <tr>
+                   <td colSpan={2} className="py-2 text-center text-text-secondary text-xs italic">No data available</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -1,3 +1,5 @@
+import { Spinner } from "@/components/ui/spinner";
+
 interface BasicDetailsProps {
     formData: any; 
     handleChange: (field: string, value: any) => void;
@@ -55,7 +57,10 @@ function BasicDetailsSection({
             </label>
             <div className="flex flex-wrap gap-2">
                 {isLoadingCategories && (
-                    <span className="text-sm text-gray-500">Loading categories...</span>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 py-1">
+                        <Spinner size="xs" variant="muted" />
+                        <span>Loading categories...</span>
+                    </div>
                 )}
                 
                 {activeCategories.map((cat) => (

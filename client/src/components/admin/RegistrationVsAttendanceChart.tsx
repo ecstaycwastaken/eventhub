@@ -24,7 +24,59 @@ ChartJS.register(
   Filler
 );
 
-const RegistrationVsAttendanceChart = () => {
+export interface ChartDataPoint {
+  date: string;
+  count: number;
+}
+
+export interface RegistrationVsAttendanceChartProps {
+  registrationData: { date: string; registrations: number }[];
+  attendanceData: { date: string; attendances: number }[];
+}
+
+const RegistrationVsAttendanceChart = ({ registrationData, attendanceData }: RegistrationVsAttendanceChartProps) => {
+  // Generate the last 7 days dates
+  const getLast7Days = () => {
+    const dates = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      dates.push(`${year}-${month}-${day}`);
+    }
+    return dates;
+  };
+
+  const dates = getLast7Days();
+
+  // Format date to day name (e.g., 'Mon')
+  const getDayName = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { weekday: 'short' });
+  };
+
+  const labels = dates.map(getDayName);
+
+  const safeRegistrationData = registrationData || [];
+  const safeAttendanceData = attendanceData || [];
+
+  // Map data to the last 7 days, filling 0 for missing days
+  const formattedRegistrationData = dates.map(date => {
+    const record = safeRegistrationData.find(item => item.date === date);
+    return record ? record.registrations : 0;
+  });
+
+  const formattedAttendanceData = dates.map(date => {
+    const record = safeAttendanceData.find(item => item.date === date);
+    return record ? record.attendances : 0;
+  });
+
+  const maxVal = Math.max(...formattedRegistrationData, ...formattedAttendanceData, 10);
+  // Round up max value to nearest multiple of 10 or 100 for better chart scaling
+  const maxScale = Math.ceil(maxVal * 1.2 / 10) * 10;
+
   const lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -50,9 +102,9 @@ const RegistrationVsAttendanceChart = () => {
       },
       y: {
         min: 0,
-        max: 600,
+        max: maxScale,
         ticks: { 
-          stepSize: 150, 
+          stepSize: Math.ceil(maxScale / 4), 
           color: '#9CA3AF', 
           font: { family: 'Inter, sans-serif', size: 10 },
           padding: 10
@@ -79,11 +131,11 @@ const RegistrationVsAttendanceChart = () => {
   };
 
   const lineChartData: ChartData<'line'> = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: labels,
     datasets: [
       {
         label: 'Attended',
-        data: [120, 160, 210, 240, 290, 420, 280],
+        data: formattedAttendanceData,
         borderColor: '#0D9488', // Teal
         backgroundColor: 'rgba(13, 148, 136, 0.1)',
         borderWidth: 3,
@@ -91,7 +143,7 @@ const RegistrationVsAttendanceChart = () => {
       },
       {
         label: 'Registered',
-        data: [90, 120, 150, 190, 240, 360, 210],
+        data: formattedRegistrationData,
         borderColor: '#2F5FDB', // Action Secondary
         backgroundColor: 'rgba(47, 95, 219, 0.1)',
         borderWidth: 3,

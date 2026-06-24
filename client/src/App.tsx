@@ -24,9 +24,11 @@ import AdminEventsPage from "./pages/private/admin/EventsPage";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path='/admin' element={<AdminLayout />}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="events" element={<AdminEventsPage />} />
+      <Route element={<AuthGuard />}>
+        <Route path='/admin' element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="events" element={<AdminEventsPage />} />
+        </Route>
       </Route>
 
       {/* Public Routes */}

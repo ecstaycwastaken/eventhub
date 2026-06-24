@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import Button from "@/components/Button";
+import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHttp } from "@/hooks/useHttp";
 import type { AuthResponse } from "@/types/response";
@@ -96,11 +97,18 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
 
         <Button
             bgColorClass="bg-brand-red"
-            className={`text-button-md py-3 rounded-xl ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`text-button-md py-3 rounded-xl flex justify-center items-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             type="submit"
             disabled={isLoading}
         >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? (
+                <>
+                    <Spinner size="xs" variant="white" />
+                    <span>Signing In...</span>
+                </>
+            ) : (
+                'Sign In'
+            )}
         </Button>
     </form>
   )
