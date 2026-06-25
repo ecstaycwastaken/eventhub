@@ -4,9 +4,9 @@ import { FaPlus } from "react-icons/fa";
 interface PageHeaderProps {
     title: string;
     subtitle: string;
-    type: 'events' | 'users' | 'categories';
+    type: 'events' | 'users' | 'categories' | 'attendances';
     total: number;
-    onCreate: () => void;
+    onCreate?: () => void;
 }
 
 export function PageHeader(props: PageHeaderProps) {
@@ -26,14 +26,16 @@ export function PageHeader(props: PageHeaderProps) {
                 <span className="text-white/70 text-sm capitalize">Total {type}</span>
             </div>
             </div>
-            <Button 
-                bgColorClass="bg-brand-red"
-                className="px-6 py-3 flex items-center justify-center gap-2 rounded-xl text-button-md font-semibold text-white shadow-resting hover:shadow-raised transition-all"
-                onClick={onCreate}
-            >
-            <FaPlus size={14} />
-                Create {type.charAt(0).toUpperCase() + type.slice(1)}
-            </Button>
+            {onCreate && (
+                <Button 
+                    bgColorClass="bg-brand-red"
+                    className="px-6 py-3 flex items-center justify-center gap-2 rounded-xl text-button-md font-semibold text-white shadow-resting hover:shadow-raised transition-all"
+                    onClick={onCreate}
+                >
+                <FaPlus size={14} />
+                    Create {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Button>
+            )}
         </div>
     );
 }

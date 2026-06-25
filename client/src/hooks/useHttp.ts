@@ -41,14 +41,13 @@ export function useHttp<T>() {
                 console.log("Request Error:", err);
                 if (axios.isAxiosError(err)) {
                     console.error("Axios Error Response:", err.response);
-                    const errorMessage = err.response?.data?.error?.message || "An error occurred during the request.";
-                    const errorCode = err.response?.data?.error?.code || "UNKNOWN_ERROR";
+                    const errorMessage = err.response?.data?.error || "An error occurred during the request.";
                     const suggestion = 
                         err.response?.data?.suggestion 
                         || err.response?.data?.error?.suggestion
                         || "Please try again later.";
 
-                    setError({ message: errorMessage, code: errorCode, suggestion });
+                    setError({ message: errorMessage, suggestion });
                 }
                 throw err;
             } finally {
@@ -58,11 +57,11 @@ export function useHttp<T>() {
         []
     );
 
-    const reset = () => {
+    const reset = useCallback(() => {
         setData(null);
-        setError({ message: "", suggestion: "" });
+        setError(null);
         setLoading(false);
-    };
+    }, []);
 
     return { data, error, loading, sendRequest, reset };
 }

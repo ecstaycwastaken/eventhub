@@ -1,5 +1,5 @@
 import type { User } from "@/types/user";
-import type { EventWithCategory } from "@/types/event";
+import type { EventWithCategory, EventsWithAttendance } from "@/types/event";
 
 export interface AuthResponse {
     message?: string;
@@ -7,10 +7,27 @@ export interface AuthResponse {
 }
 
 export interface GetAllEventsResponse {
-    hasEvents: boolean; // TODO: Make a snake_case in the backend for this property
+    has_events: boolean;
     events: EventWithCategory[];
     total_events: number;
     categories: {
         [string]: number;
     }
+}
+
+export interface GetAllUsersResponse {
+    message?: string;
+    users: User[];
+}
+
+export interface GetUserByIdResponse {
+    message?: string;
+    user: User;
+}
+
+export interface GetAllEventsAttendanceResponse {
+    message?: string;
+    has_events: boolean;
+    events_attendance_data: EventsWithAttendance[];
+    total_events: number;
 }

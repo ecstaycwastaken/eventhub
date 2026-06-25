@@ -6,6 +6,7 @@ interface AuthContextType {
     user: User | null;
     updateAuthState: (userData: User) => void;
     logout: () => void;
+    loading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

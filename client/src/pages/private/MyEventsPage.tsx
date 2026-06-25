@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useHttp } from "@/hooks/useHttp";
-import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { EventList } from "@/components/event-browser/EventList";
 import type { EventWithCategory } from "@/types/event";
@@ -14,7 +13,6 @@ interface MyEventsResponse {
 
 function MyEventsPage() {
     const { data, loading, error, sendRequest } = useHttp<MyEventsResponse>();
-    const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,11 +47,11 @@ function MyEventsPage() {
             <Button
                 bgColorClass="bg-brand-red"
                 className={'self-end text-button-lg py-3 w-50 rounded-xl flex justify-center items-center gap-2'}
-                onClick={() => navigate('/home/my-events/create-event')}
+                onClick={() => navigate('/u/my-events/create-event')}
             >
                 Create Event
             </Button>
-            <EventList events={eventsToShow} loading={loading} error={errorMessage} currentUserId={user?.id} />
+            <EventList events={eventsToShow} loading={loading} error={errorMessage} />
         </div>
     </div>
   )
