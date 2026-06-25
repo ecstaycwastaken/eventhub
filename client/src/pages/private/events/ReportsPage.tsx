@@ -164,7 +164,7 @@ function ReportsPage() {
 
   // --- Render ---
   return (
-    <div className="p-8 md:p-12 font-dm">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-12 font-dm">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -175,7 +175,7 @@ function ReportsPage() {
           id="event-selector"
           value={selectedEventId}
           onChange={handleEventChange}
-          className="border border-gray-200 rounded-lg px-4 py-2.5 bg-white text-caption-2 outline-none focus:border-gray-400 cursor-pointer min-w-55"
+          className="border border-gray-200 rounded-lg px-4 py-2.5 bg-white text-caption-2 outline-none focus:border-gray-400 cursor-pointer w-full md:w-auto min-w-55"
         >
           <option value="">All Events Overview</option>
           {(data?.events_list || []).map((evt) => (
@@ -235,7 +235,7 @@ function ReportsPage() {
             {/* Registration Status Doughnut */}
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <h2 className="font-bold text-lg text-gray-900 mb-4">Registration Status</h2>
-              <div className="flex items-center justify-center gap-8 min-h-55">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 min-h-55">
                 {doughnutData && (data.registration_status.confirmed > 0 || data.registration_status.checked_in > 0) ? (
                   <>
                     <div className="w-45 h-45 relative shrink-0">
@@ -279,7 +279,7 @@ function ReportsPage() {
               <span className="font-bold">Attendee List</span>
               <span className="text-sm">{data.attendees.length} registrations</span>
             </div>
-            <div className="bg-white border border-gray-200 rounded-b-xl overflow-hidden overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-b-xl overflow-hidden overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse min-w-175">
                 <thead>
                   <tr className="border-b border-gray-200">
