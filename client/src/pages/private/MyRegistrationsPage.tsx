@@ -30,17 +30,21 @@ function MyRegistrationsPage() {
     const totalEvents = data?.total_events || 0;
     const errorMessage = error ? (error.message || "Failed to load events") : null;
 
-    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const upcomingEvents = events.filter(e => {
         const status = e.user_status || e.event_attendances?.[0]?.status;
         const eventDate = new Date(e.date);
-        return status === 'registered' && eventDate >= now;
+        eventDate.setHours(0, 0, 0, 0);
+        return status === 'registered' && eventDate >= today;
     });
 
     const pastEvents = events.filter(e => {
         const status = e.user_status || e.event_attendances?.[0]?.status;
         const eventDate = new Date(e.date);
-        return status === 'attended' || eventDate < now;
+        eventDate.setHours(0, 0, 0, 0);
+        return status === 'attended' || (status === 'registered' && eventDate < today);
     });
 
   return (

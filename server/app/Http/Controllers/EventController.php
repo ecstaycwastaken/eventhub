@@ -441,10 +441,13 @@ class EventController extends Controller
             // Fetch the events the user is registered for along with their categories
             $events = Event::whereHas('eventAttendances', function ($query) use ($user) {
                     $query->where('user_id', $user->id)
-                        ->where('status', '<>', 'host'); // Exclude events where the user is the host
+                        ->whereIn('status', ['registered', 'attended']); // Only include active registrations
                 })
                 ->with('category')
-                ->with('eventAttendances:user_id,event_id,status,code')
+                ->with(['eventAttendances' => function($query) use ($user) {
+                    $query->select('user_id', 'event_id', 'status', 'code')
+                          ->where('user_id', $user->id);
+                }])
                 ->withCount(['eventAttendances' => function ($query) {
                     $query->whereIn('status', ['registered', 'attended']);
                 }])
