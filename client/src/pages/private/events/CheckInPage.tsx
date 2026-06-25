@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { AttendanceData } from "@/types/attendee";
 import { useHttp } from "@/hooks";
 import { Spinner } from "@/components/ui/spinner";
+import Button from "@/components/Button";
 
 interface EventOption {
     id: number | string;
@@ -16,7 +17,7 @@ function CheckInPage() {
     const [manualCode, setManualCode] = useState("");
     const [selectedEventId, setSelectedEventId] = useState<string>("");
 
-    const { data: eventsRes, sendRequest: fetchEvents } = useHttp<{events: EventOption[]}>();
+    const { data: eventsRes, sendRequest: fetchEvents, loading: loadingEvents } = useHttp<{events: EventOption[]}>();
     const { data: attendanceData, sendRequest: fetchAttendance, loading: loadingAttendance } = useHttp<AttendanceData>();
     const { sendRequest: checkInRequest, loading: isCheckingIn } = useHttp();
 
@@ -87,16 +88,19 @@ function CheckInPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <div className="border border-gray-200 rounded-xl p-5 shadow-sm">
-                        <label className="block text-label text-gray-500 tracking-wider mb-3">
-                            SELECT EVENT
+                        <label className="flex items-center justify-between text-label text-gray-500 tracking-wider mb-3">
+                            <span>SELECT EVENT</span>
+                            {loadingEvents && <Spinner size="xs" variant="muted" thickness={3} />}
                         </label>
                         <select 
                             value={effectiveEventId}
                             onChange={(e) => setSelectedEventId(e.target.value)}
-                            disabled={!eventsRes?.events?.length}
+                            disabled={loadingEvents || !eventsRes?.events?.length}
                             className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-800 text-caption-2 rounded-lg px-4 py-3 outline-none focus:border-gray-400 transition-colors appearance-none disabled:opacity-50"
                         >
-                            {eventsRes?.events?.length ? (
+                            {loadingEvents ? (
+                                <option>Loading events...</option>
+                            ) : eventsRes?.events?.length ? (
                                 eventsRes.events.map(event => (
                                     <option key={event.id} value={event.id}>{event.title}</option>
                                 ))
@@ -112,18 +116,19 @@ function CheckInPage() {
                         </label>
                         <input 
                             type="text" 
-                            placeholder="EVT-XXXXXXXX" 
+                            placeholder="XXXXXXXXXXXXXXXX" 
                             value={manualCode}
                             onChange={(e) => setManualCode(e.target.value)}
                             className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-800 text-caption-2 rounded-lg px-4 py-3 outline-none focus:border-gray-400 transition-colors mb-4 uppercase"
                         />
-                        <button 
+                        <Button 
+                            bgColorClass="bg-[#2563EB]"
                             onClick={() => handleCheckIn(manualCode)}
                             disabled={isCheckingIn || !manualCode}
-                            className="w-full bg-[#2563EB] hover:bg-blue-700 disabled:opacity-70 disabled:hover:bg-[#2563EB] text-white text-button-lg rounded-lg py-3 flex items-center justify-center gap-2 transition-colors"
+                            className="w-full disabled:opacity-70 disabled:hover:bg-[#2563EB] text-button-lg rounded-lg py-3 flex items-center justify-center gap-2"
                         >
                             <IoQrCode size={18} /> {isCheckingIn ? 'Checking in user...' : 'Check In'}
-                        </button>
+                        </Button>
                     </div>
                     
                     <div className="border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -185,7 +190,6 @@ function CheckInPage() {
                                     </div>
 
                                     <div className="flex items-center gap-6">
-                                        {/* Status Mapping: 'registered' -> Confirmed, 'attended' -> Checked In */}
                                         {attendee.status === "registered" ? (
                                             <span className="bg-[#E6F4EA] text-[#137333] px-3 py-1 rounded-md text-caption-3 font-bold">
                                                 Confirmed
@@ -202,23 +206,22 @@ function CheckInPage() {
                                         )}
 
                                         {attendee.status === "registered" && (
-                                            <button 
+                                            <Button 
+                                                bgColorClass="bg-[#1A1A1A]"
                                                 onClick={() => handleCheckIn(attendee.code)}
                                                 disabled={isCheckingIn}
-                                                className="flex items-center gap-2 bg-[#1A1A1A] hover:bg-black disabled:opacity-70 disabled:hover:bg-[#1A1A1A] text-white px-4 py-2 rounded-lg text-caption-3 font-medium transition-colors shadow-sm"
+                                                className="flex items-center gap-2 disabled:opacity-70 disabled:hover:bg-[#1A1A1A] px-4 py-2 rounded-lg text-button-md shadow-sm"
                                             >
                                                 <FiCheck /> Check In
-                                            </button>
+                                            </Button>
                                         )}
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
-
                 </div>
             </div>
-            
         </div>
     );
 }

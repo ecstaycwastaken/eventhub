@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import heroBG from '@/assets/hero-bg.png';
 import Button from '../Button';
 import EventDetailsModal from './EventDetailsModal';
@@ -15,14 +16,16 @@ interface EventCardProps {
 function EventCard({ event }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+
   const isOwner = user?.id === event.user_id;
   const isAdmin = user?.role === 'admin';
   const isInAdminPath = window.location.pathname.startsWith('/admin');
   const viewingAsAdmin = isAdmin && isInAdminPath;
+  const isRegisteredPath = location.pathname.includes('/my-registrations');
 
-  const price =
-    Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
-
+  const isRegistered = isRegisteredPath || event.user_status === 'registered' || event.user_status === 'attended';
+  const price = Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
   const date = new Date(event.date)
 
   const formattedDate = date.toLocaleDateString('en-US', {
@@ -35,6 +38,13 @@ function EventCard({ event }: EventCardProps) {
     hour: 'numeric',
     minute: '2-digit',
   })
+
+  const handleViewPass = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
+  const userCode = event.code || event.event_attendances?.[0]?.code || 'XXXXXXXXXXXXXXXX';
 
   return (
     <>
@@ -49,6 +59,10 @@ function EventCard({ event }: EventCardProps) {
           {isOwner || viewingAsAdmin ? (
             <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text">
               Published
+            </div>
+          ) : isRegistered ? (
+            <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text shadow-sm">
+              Confirmed
             </div>
           ) : (
             <div className="absolute right-3 top-3 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white">
@@ -77,7 +91,13 @@ function EventCard({ event }: EventCardProps) {
               <span className="truncate">{event.venue}</span>
             </p>
 
-            <div className="mt-auto pt-2">
+            {isRegistered && (
+              <p className="text-gray-400 text-caption-2 tracking-wider uppercase mt-1">
+                {userCode}
+              </p>
+            )}
+
+            <div className="mt-auto pt-4 flex gap-2 w-full">
               {isOwner || viewingAsAdmin ? (
                 <Button
                   bgColorClass="bg-transparent"
@@ -87,10 +107,20 @@ function EventCard({ event }: EventCardProps) {
                 >
                   See details
                 </Button>
+              ) : isRegistered ? (
+                  <Button
+                    bgColorClass="bg-white"
+                    textColorClass="text-black"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2 text-button-lg border border-gray-200 shadow-sm"
+                    onClick={handleViewPass}
+                  >
+                    View Event
+                  </Button>
               ) : (
                 <Button
                   bgColorClass="bg-blue-600"
                   className="w-full rounded-xl py-2 font-semibold text-white"
+                  onClick={() => setIsModalOpen(true)}
                 >
                   Request to Join
                 </Button>

@@ -23,10 +23,10 @@ class EventController extends Controller
                 'title' => 'required|string',
                 'description' => 'required|string',
                 'category' => 'required|exists:event_categories,id',
-                'date' => 'required|date',
+                'date' => 'required|date|after_or_equal:today',
                 'venue' => 'required|string',
-                'capacity' => 'required|integer',
-                'price' => 'required|numeric',
+                'capacity' => 'required|integer|min:0',
+                'price' => 'required|numeric|min:0',
             ]);
 
             $user = $request->user();
@@ -112,10 +112,10 @@ class EventController extends Controller
                 'title' => 'sometimes|required|string',
                 'description' => 'sometimes|required|string',
                 'category' => 'sometimes|required|exists:event_categories,id',
-                'date' => 'sometimes|required|date',
+                'date' => 'sometimes|required|date|after_or_equal:today',
                 'venue' => 'sometimes|required|string',
-                'capacity' => 'sometimes|required|integer',
-                'price' => 'sometimes|required|numeric',
+                'capacity' => 'sometimes|required|integer|min:0',
+                'price' => 'sometimes|required|numeric|min:0',
             ]);
 
             $bannerUrl = $event->banner_image;
@@ -262,34 +262,34 @@ class EventController extends Controller
     /**
      * NOTE: To be adjusted, this method is currently not used.
      */
-    public function searchEvents(Request $request) {
-        try {
-            $query = $request->query('q', '');
+    // public function searchEvents(Request $request) {
+    //     try {
+    //         $query = $request->query('q', '');
 
-            // Search for events by title or description
-            $events = Event::where('title', 'ilike', "%{$query}%")
-                ->orWhere('description', 'ilike', "%{$query}%")
-                ->with('category')
-                ->get();
+    //         // Search for events by title or description
+    //         $events = Event::where('title', 'ilike', "%{$query}%")
+    //             ->orWhere('description', 'ilike', "%{$query}%")
+    //             ->with('category')
+    //             ->get();
 
-            $categories = $events->groupBy('category.name')->map(function ($group) {
-                return $group->count();
-            });
+    //         $categories = $events->groupBy('category.name')->map(function ($group) {
+    //             return $group->count();
+    //         });
 
-            return response()->json([
-                'has_events' => !$events->isEmpty(),
-                'events' => $events,
-                'total_events' => $events->count(),
-                'categories' => $categories
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error searching events: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An unexpected error occurred while searching events.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'has_events' => !$events->isEmpty(),
+    //             'events' => $events,
+    //             'total_events' => $events->count(),
+    //             'categories' => $categories
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error searching events: ' . $e->getMessage());
+    //         return response()->json([
+    //             'message' => 'An unexpected error occurred while searching events.',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+    //         ], 500);
+    //     }
+    // }
 
     public function getAllEvents(Request $request) {
         try {
@@ -302,7 +302,7 @@ class EventController extends Controller
             $eventsQuery = Event::query()
                 ->with('category:id,name,color')
                 ->withCount(['eventAttendances' => function ($query) {
-                    $query->where('status', 'in', ['registered', 'attended']);
+                    $query->whereIn('status', ['registered', 'attended']);
                 }])
                 ->when($category, function ($q) use ($category) {
                     $q->whereHas('category', function ($relationshipQuery) use ($category) {
@@ -348,6 +348,8 @@ class EventController extends Controller
     public function getMyEvents(Request $request) {
         try {
             $user = $request->user();
+            $searchQuery = $request->query('q', null);
+            $perPage = $request->query('per_page', 5);
             
             // Optional query parameter to specify which columns to retrieve. Default to all columns if not provided.
             $columns = $request->query('columns');
@@ -367,23 +369,33 @@ class EventController extends Controller
             }
 
             // Fetch events hosted by the user along with their categories and attendee counts
-            $events = Event::select($columns)
+            $eventsQuery = Event::select($columns)
                 ->where('user_id', $user->id)
                 ->with('category')
                 ->withCount(['eventAttendances as attendees_count' => function ($query) {
                     $query->where('status', 'registered');
                 }])
-                ->get();
+                ->when($searchQuery, function ($q) use ($searchQuery) {
+                    $q->where(function ($subQuery) use ($searchQuery) {
+                        $subQuery->where('title', 'ilike', "%{$searchQuery}%")
+                            ->orWhere('description', 'ilike', "%{$searchQuery}%");
+                    });
+                })
+                ->orderBy('date', 'desc');
+
+            $paginator = $eventsQuery->paginate($perPage);
 
             // Append host name to each event (the host is the current user)
-            $events->each(function($event) {
+            $events = collect($paginator->items())->each(function($event) {
                 $event->host_name = $event->getEventHost();
             });
 
             return response()->json([
                 'has_events' => $events->isNotEmpty(),
                 'events' => $events,
-                'total_events' => $events->count(),
+                'total_events' => $paginator->total(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
             ]);
 
         } catch (\Exception $e) {
@@ -401,8 +413,12 @@ class EventController extends Controller
 
             // Fetch the events the user is registered for along with their categories
             $events = Event::whereHas('eventAttendances', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->with('category')->get();
+                    $query->where('user_id', $user->id)
+                        ->where('status', '<>', 'host'); // Exclude events where the user is the host
+                })
+                ->with('category')
+                ->with('eventAttendances:user_id,event_id,status,code')
+                ->get();
 
             // Return success whether the user has registered events or not, along with the events data
             return response()->json([
@@ -435,7 +451,7 @@ class EventController extends Controller
             }
 
             // Delete the attendance record to unregister the user
-            $attendance->delete();
+            EventAttendance::where('code', $attendance->code)->delete();
 
             return response()->json(['message' => 'Successfully unregistered from the event.']);
         } catch (\Exception $e) {

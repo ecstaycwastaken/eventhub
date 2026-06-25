@@ -1,4 +1,5 @@
 import logoImg from '@/assets/logo.png'
+import { Link } from 'react-router-dom'
 
 function Footer() {
   return (
@@ -12,9 +13,9 @@ function Footer() {
         </div>
         <div className='flex flex-col items-end gap-2'>
             <div className='flex gap-4'>
-                <p className='text-[#6B7280] text-sub-2'>About</p>
-                <p className='text-[#6B7280] text-sub-2'>Contact</p>
-                <p className='text-[#6B7280] text-sub-2'>Privacy</p>
+                <Link to="/about" className='text-[#6B7280] text-sub-2 hover:text-[#111111] transition-colors'>About</Link>
+                <Link to="/contact" className='text-[#6B7280] text-sub-2 hover:text-[#111111] transition-colors'>Contact</Link>
+                <Link to="/privacy" className='text-[#6B7280] text-sub-2 hover:text-[#111111] transition-colors'>Privacy</Link>
             </div>
             <p className='text-[#6B7280] text-sub-2'>
                 © 2026 EventHub. All rights reserved.

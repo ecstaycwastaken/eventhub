@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->api(append: [
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+        ]);
+        
         $middleware->alias([
             'supabase.auth' => SupabaseAuthMiddleware::class,
             'role' => RoleMiddleware::class,

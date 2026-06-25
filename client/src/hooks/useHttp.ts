@@ -1,22 +1,37 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 
 export interface ErrorMessage {
     message?: string;
     code?: string;
     suggestion?: string;
+    validationErrors?: Record<string, string[]>;
 }
 
 export function useHttp<T>() {
     const [data, setData] = useState<T | null>(null);
     const [error, setError] = useState<ErrorMessage | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     const sendRequest = useCallback(
         async (
             config: AxiosRequestConfig,
             fullUrl: boolean = false
         ): Promise<AxiosResponse<T> | undefined> => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            abortControllerRef.current = new AbortController();
+
             setLoading(true);
             setError(null);
 
@@ -30,27 +45,39 @@ export function useHttp<T>() {
                 ...restConfig,
                 url: apiUrl,
                 withCredentials: true,
+                signal: abortControllerRef.current.signal,
             };
 
             try {
                 const response: AxiosResponse<T> = await axios(updatedConfig);
                 setData(response.data);
                 setError(null);
+                setLoading(false);
                 return response;
             } catch (err) {
+                if (axios.isCancel(err)) {
+                    console.log("Request canceled");
+                    return;
+                }
                 console.log("Request Error:", err);
                 if (axios.isAxiosError(err)) {
                     console.error("Axios Error Response:", err.response);
-                    const errorMessage = err.response?.data?.error || "An error occurred during the request.";
+                    const responseData = err.response?.data;
+                    
+                    let errorMessage = responseData?.message || responseData?.error || "An error occurred during the request.";
+                    const validationErrors = responseData?.errors;
+
+                    if (validationErrors && Object.keys(validationErrors).length > 0 && !responseData?.message) {
+                        errorMessage = Object.values(validationErrors).flat()[0] as string;
+                    }
+
                     const suggestion = 
-                        err.response?.data?.suggestion 
-                        || err.response?.data?.error?.suggestion
+                        responseData?.suggestion 
+                        || responseData?.error?.suggestion
                         || "Please try again later.";
 
-                    setError({ message: errorMessage, suggestion });
+                    setError({ message: errorMessage, suggestion, validationErrors });
                 }
-                throw err;
-            } finally {
                 setLoading(false);
             }
         },
