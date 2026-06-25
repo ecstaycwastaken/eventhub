@@ -10,7 +10,7 @@ function AdminLayout() {
     <div className="h-screen flex font-dm color-foreground">
       <Sidebar collapsed={collapsed} />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         <Header
           collapsed={collapsed}
           setCollapsed={setCollapsed}

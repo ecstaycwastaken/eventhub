@@ -16,7 +16,7 @@ function EventsLayout() {
     <div className="flex min-h-[calc(100vh-70px)] bg-[#F9FAFB] font-dm">
       <Sidebar collapsed={collapsed} title="Host Dashboard" links={hostLinks} onToggle={() => setCollapsed(!collapsed)} />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
 
         <main className="flex-1 p-6 text-body-1 color-foreground">
           <Outlet />

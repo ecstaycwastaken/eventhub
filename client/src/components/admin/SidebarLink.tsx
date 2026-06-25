@@ -33,20 +33,25 @@ function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
         }
       }}
       className={`
-        flex items-center px-3 py-2.5 rounded-md text-[15px] font-medium transition-colors
+        flex flex-col md:flex-row items-center justify-center md:justify-start
+        px-1 md:px-3 py-1.5 md:py-2.5 rounded-md transition-colors font-medium
         ${isActive 
-          ? "bg-primary text-white" 
+          ? "text-primary md:bg-primary md:text-white" 
           : "text-text-secondary hover:text-ink hover:bg-bg-subtle"
         }
-        ${collapsed ? "justify-center" : "justify-start"}
+        ${collapsed ? "md:justify-center" : "md:justify-start"}
+        flex-1 md:flex-none w-full md:w-auto h-full md:h-auto
       `}
       title={collapsed ? label : undefined}
     >
-      <Icon size={18} className="shrink-0" />
+      <Icon className="text-[20px] md:text-[18px] shrink-0 mb-1 md:mb-0" />
       <span
         className={`
+          text-[10px] md:text-[15px]
           whitespace-nowrap overflow-hidden transition-all duration-300
-          ${collapsed ? "w-0 opacity-0 ml-0" : "w-full opacity-100 ml-3"}
+          md:ml-3
+          ${collapsed ? "md:w-0 md:opacity-0 md:ml-0 hidden md:block" : "w-full md:w-full opacity-100 block"}
+          text-center md:text-left
         `}
       >
         {label}
