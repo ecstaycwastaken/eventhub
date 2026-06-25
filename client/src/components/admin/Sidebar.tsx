@@ -16,6 +16,7 @@ interface SidebarProps {
   title?: string;
   links?: NavLinkItem[];
   onToggle?: () => void;
+  className?: string;
 }
 
 const defaultAdminLinks: NavLinkItem[] = [
@@ -26,12 +27,13 @@ const defaultAdminLinks: NavLinkItem[] = [
   { label: "Categories", path: "/admin/categories", icon: FaTags },
 ];
 
-function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLinks, onToggle }: SidebarProps) {
+function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLinks, onToggle, className }: SidebarProps) {
   return (
     <aside className={`
       fixed bottom-0 left-0 right-0 z-50 bg-bg-page border-t border-border flex flex-row h-16
-      md:sticky md:top-0 md:h-[calc(100vh-70px)] md:flex-col md:border-r md:border-t-0 md:transition-all md:duration-300 md:z-20
+      md:flex-col md:border-r md:border-t-0 md:transition-all md:duration-300 md:z-20
       ${collapsed ? "md:w-18" : "md:w-64"}
+      ${className || "md:sticky md:top-0 md:h-screen"}
     `}>
       <div className="hidden md:flex items-center h-16 border-b border-border px-5 mb-4 gap-4">
         {onToggle && (
@@ -55,14 +57,13 @@ function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLin
             collapsed={collapsed}
           />
         ))}
-        <div className="md:mt-auto md:mb-4 flex flex-1 md:flex-none">
-          <SidebarLink
-            path="/u/events"
-            icon={IoMdArrowBack}
-            label="Return"
-            collapsed={collapsed}
-          />
-        </div>
+        <SidebarLink
+          path="/u/events"
+          icon={IoMdArrowBack}
+          label="Return"
+          collapsed={collapsed}
+          className="md:mt-auto md:mb-4"
+        />
       </nav>
     </aside>
   )

@@ -6,9 +6,10 @@ interface SidebarLinkProps {
   icon: IconType,
   path: string,
   collapsed: boolean,
+  className?: string,
 }
 
-function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
+function SidebarLink({label, icon, path, collapsed, className}: SidebarLinkProps) {
   const Icon = icon; 
   const { pathname } = useLocation();
 
@@ -41,6 +42,7 @@ function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
         }
         ${collapsed ? "md:justify-center" : "md:justify-start"}
         flex-1 md:flex-none w-full md:w-auto h-full md:h-auto
+        ${className || ""}
       `}
       title={collapsed ? label : undefined}
     >
