@@ -54,6 +54,7 @@ Route::prefix('v1')->group(function () {
         // NOTE: The following route is currently not in use. It was intended to fetch a report for a specific event by its ID, but the implementation has been commented out in the controller.
         // Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
         Route::delete('/attendance/{id}', [EventController::class, 'deleteAttendanceById'])->name('events.delete-attendance');
+        Route::delete('/registered-events/{id}', [EventController::class, 'unregisterFromEvent'])->name('events.unregister');
     });
 
     Route::middleware(['supabase.auth'])->prefix('user')->group(function () {

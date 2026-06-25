@@ -419,6 +419,34 @@ class EventController extends Controller
         }
     }
 
+    public function unregisterFromEvent(Request $request, string $id) {
+        try {
+            $user = $request->user();
+
+            // Check if the user is registered for the event
+            $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
+            if (!$attendance) {
+                return response()->json(['message' => 'You are not registered for this event.'], 400);
+            }
+
+            // Prevent the host from unregistering themselves
+            if ($attendance->status === 'host') {
+                return response()->json(['message' => 'The host cannot unregister from their own event.'], 400);
+            }
+
+            // Delete the attendance record to unregister the user
+            $attendance->delete();
+
+            return response()->json(['message' => 'Successfully unregistered from the event.']);
+        } catch (\Exception $e) {
+            Log::error('Error unregistering from event: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'An unexpected error occurred while unregistering from the event.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+            ], 500);
+        }
+    }
+
     public function getEventViewPass(Request $request, string $id) {
         try {
             $user = $request->user();
