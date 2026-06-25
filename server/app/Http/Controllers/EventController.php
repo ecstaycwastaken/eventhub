@@ -711,59 +711,60 @@ class EventController extends Controller
         }
     }
 
-    public function getEventReport(Request $request, string $id) {
-        try {
-            $user = $request->user();
-            $event = Event::with('category')->findOrFail($id);
+    // NOTE: This method is currently not in used.
+    // public function getEventReport(Request $request, string $id) {
+    //     try {
+    //         $user = $request->user();
+    //         $event = Event::with('category')->findOrFail($id);
 
-            // Check if the authenticated user is the host of the event
-            $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
-            $authorized = ($attendance && $attendance->isEventHost()) || $user->role === 'admin';
-            if (!$authorized) {
-                return response()->json(['message' => 'Unauthorized. Only the event host or admin can view this report.'], 403);
-            }
+    //         // Check if the authenticated user is the host of the event
+    //         $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
+    //         $authorized = ($attendance && $attendance->isEventHost()) || $user->role === 'admin';
+    //         if (!$authorized) {
+    //             return response()->json(['message' => 'Unauthorized. Only the event host or admin can view this report.'], 403);
+    //         }
 
-            // Fetch all attendees for the event along with their attendance status
-            $attendees = EventAttendance::with('user')->where('event_id', $id)->where('status', '<>', 'host')->get();
-            $total_registered = $attendees->where('status', 'registered', 'attended')->count();
-            $total_attended = $attendees->where('status', 'attended')->count();
+    //         // Fetch all attendees for the event along with their attendance status
+    //         $attendees = EventAttendance::with('user')->where('event_id', $id)->where('status', '<>', 'host')->get();
+    //         $total_registered = $attendees->where('status', 'registered', 'attended')->count();
+    //         $total_attended = $attendees->where('status', 'attended')->count();
 
-            // Build attendees data with user details and attendance status
-            $attendeesData = $attendees->map(function ($attendance) {
-                return [
-                    'user_id' => $attendance->user_id,
-                    'full_name' => $attendance->user->getFullNameAttribute(),
-                    'status' => $attendance->status,
-                    'code' => $attendance->code,
-                    'registered_at' => $attendance->created_at,
-                    'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
-                ];
-            });
+    //         // Build attendees data with user details and attendance status
+    //         $attendeesData = $attendees->map(function ($attendance) {
+    //             return [
+    //                 'user_id' => $attendance->user_id,
+    //                 'full_name' => $attendance->user->getFullNameAttribute(),
+    //                 'status' => $attendance->status,
+    //                 'code' => $attendance->code,
+    //                 'registered_at' => $attendance->created_at,
+    //                 'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
+    //             ];
+    //         });
 
-            // Registration overtime data
-            $registrationOvertime = EventAttendance::selectRaw('DATE(created_at) as registration_date, COUNT(*) as registrations_count')
-                ->where('event_id', $id)
-                ->where('created_at', '>=', Carbon::now()->subDays(30)) // Last 30 days
-                ->where('status', 'attended')->orWhere('status', 'registered') // Exclude hosts from the report
-                ->groupBy('registration_date')
-                ->orderBy('registration_date', 'asc')
-                ->get();
+    //         // Registration overtime data
+    //         $registrationOvertime = EventAttendance::selectRaw('DATE(created_at) as registration_date, COUNT(*) as registrations_count')
+    //             ->where('event_id', $id)
+    //             ->where('created_at', '>=', Carbon::now()->subDays(30)) // Last 30 days
+    //             ->where('status', 'attended')->orWhere('status', 'registered') // Exclude hosts from the report
+    //             ->groupBy('registration_date')
+    //             ->orderBy('registration_date', 'asc')
+    //             ->get();
 
-            return response()->json([
-                'attendees' => $attendeesData,
-                'total_registered' => $total_registered,
-                'total_checked_in' => $total_attended,
-                'total_capacity' => $event->capacity,
-                'registration_overtime' => $registrationOvertime
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Event not found.'], 404);
-        } catch (\Exception $e) {
-            Log::error('Error fetching event report: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An unexpected error occurred while fetching the event report.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'attendees' => $attendeesData,
+    //             'total_registered' => $total_registered,
+    //             'total_checked_in' => $total_attended,
+    //             'total_capacity' => $event->capacity,
+    //             'registration_overtime' => $registrationOvertime
+    //         ]);
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return response()->json(['message' => 'Event not found.'], 404);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error fetching event report: ' . $e->getMessage());
+    //         return response()->json([
+    //             'message' => 'An unexpected error occurred while fetching the event report.',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+    //         ], 500);
+    //     }
+    // }
 }
