@@ -293,6 +293,18 @@ class EventController extends Controller
 
     public function getAllEvents(Request $request) {
         try {
+            $token = $request->cookie('access_token') ?? $request->bearerToken();
+            $userId = null;
+            if ($token) {
+                $parts = explode('.', $token);
+                if (count($parts) === 3) {
+                    $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+                    if (isset($payload['sub'])) {
+                        $userId = $payload['sub'];
+                    }
+                }
+            }
+
             // Filter events
             $category = $request->query('category', null);
             $query = $request->query('q', null);
@@ -315,12 +327,26 @@ class EventController extends Controller
                             ->orWhere('description', 'ilike', "%{$query}%");
                     });
                 })
+                ->when($userId, function ($q) use ($userId) {
+                    $q->with(['eventAttendances' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId)->select('event_id', 'status');
+                    }]);
+                })
                 ->orderBy('date', 'asc');
 
             $totalEvents = (clone $eventsQuery)->count();
 
             $events = $eventsQuery->cursorPaginate($perPage);
             
+            $items = $events->items();
+            if ($userId) {
+                foreach ($items as $event) {
+                    $attendance = $event->eventAttendances->first();
+                    $event->user_status = $attendance ? $attendance->status : 'not_registered';
+                    unset($event->eventAttendances);
+                }
+            }
+
             // NOTE: Unused data in the frontend.
             // $categories = $events->groupBy('category.name')->map(function ($group) {
             //     return $group->count();
@@ -328,7 +354,7 @@ class EventController extends Controller
 
             return response()->json([
                 'has_events' => !$events->isEmpty(),
-                'events' => $events->items(),
+                'events' => $items,
                 'pagination' => [
                     'next_cursor' => $events->nextCursor() ? $events->nextCursor()->encode() : null,
                     'has_more' => $events->hasMorePages(),
@@ -418,6 +444,9 @@ class EventController extends Controller
                 })
                 ->with('category')
                 ->with('eventAttendances:user_id,event_id,status,code')
+                ->withCount(['eventAttendances' => function ($query) {
+                    $query->whereIn('status', ['registered', 'attended']);
+                }])
                 ->get();
 
             // Return success whether the user has registered events or not, along with the events data

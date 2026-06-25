@@ -32,7 +32,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const date = new Date(event.date);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    const eventAttendances = event.event_attendances_count || 0;
+    const eventAttendances = (event as any).attendees_count || event.event_attendances_count || 0;
     const availableSlots = event.capacity - eventAttendances;
 
     const isFromAdminRoute = location.pathname.startsWith('/admin');

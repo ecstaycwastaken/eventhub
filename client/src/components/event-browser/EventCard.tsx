@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import heroBG from '@/assets/hero-bg.png';
 import Button from '../Button';
 import EventDetailsModal from './EventDetailsModal';
+import ViewPassModal from './ViewPassModal';
 import { useAuth } from '@/hooks/useAuth';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import type { EventWithCategory } from "@/types/event";
@@ -15,6 +16,7 @@ interface EventCardProps {
 
 function EventCard({ event }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
 
@@ -41,7 +43,7 @@ function EventCard({ event }: EventCardProps) {
 
   const handleViewPass = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsModalOpen(true);
+    setIsPassModalOpen(true);
   };
 
   const userCode = event.code || event.event_attendances?.[0]?.code || 'XXXXXXXXXXXXXXXX';
@@ -71,7 +73,7 @@ function EventCard({ event }: EventCardProps) {
           )}
 
             <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white">
-              {event.capacity} slots left
+              {event.capacity - ((event as any).attendees_count || event.event_attendances_count || 0)} slots left
             </div>
           </div>
 
@@ -132,6 +134,11 @@ function EventCard({ event }: EventCardProps) {
         <EventDetailsModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
+          event={event} 
+        />
+        <ViewPassModal 
+          isOpen={isPassModalOpen} 
+          onClose={() => setIsPassModalOpen(false)} 
           event={event} 
         />
     </>
