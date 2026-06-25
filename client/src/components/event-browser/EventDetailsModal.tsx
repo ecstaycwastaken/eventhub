@@ -32,7 +32,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const date = new Date(event.date);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    const eventAttendances = (event as any).attendees_count || event.event_attendances_count || 0;
+    const eventAttendances = event.attendees_count || event.event_attendances_count || 0;
     const availableSlots = event.capacity - eventAttendances;
 
     const isFromAdminRoute = location.pathname.startsWith('/admin');
@@ -40,7 +40,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const isOwner = user?.id === event.user_id;
 
     const isRegisteredPath = location.pathname.includes('/my-registrations');
-    const isRegistered = isRegisteredPath || (event as any).user_status === 'registered' || (event as any).user_status === 'attended';
+    const isRegistered = isRegisteredPath || event.user_status === 'registered' || event.user_status === 'attended';
 
     const handleEditClick = useCallback(() => {
         const route = isFromAdminRoute ? '/admin/events/edit' : '/u/my-events/edit';
@@ -104,7 +104,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
 
                         <Button
-                            bgColorClass="bg-white/10"
+                            bgColorClass="bg-black/50 hover:bg-black/70"
                             className="absolute top-4 right-4 z-20 flex items-center justify-center w-10 h-10 rounded-full"
                             onClick={onClose}
                         >

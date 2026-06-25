@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import heroBG from '@/assets/hero-bg.png';
 import Button from '../Button';
 import EventDetailsModal from './EventDetailsModal';
-import ViewPassModal from './ViewPassModal';
 import { useAuth } from '@/hooks/useAuth';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import type { EventWithCategory } from "@/types/event";
@@ -16,7 +15,6 @@ interface EventCardProps {
 
 function EventCard({ event }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
 
@@ -26,7 +24,7 @@ function EventCard({ event }: EventCardProps) {
   const viewingAsAdmin = isAdmin && isInAdminPath;
   const isRegisteredPath = location.pathname.includes('/my-registrations');
 
-  const isRegistered = isRegisteredPath || event.user_status === 'registered' || event.user_status === 'attended';
+  const isRegistered = !viewingAsAdmin && (isRegisteredPath || event.user_status === 'registered' || event.user_status === 'attended');
   const price = Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
   const date = new Date(event.date)
 
@@ -41,16 +39,13 @@ function EventCard({ event }: EventCardProps) {
     minute: '2-digit',
   })
 
-  const handleViewPass = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsPassModalOpen(true);
-  };
+
 
   const userCode = event.code || event.event_attendances?.[0]?.code || 'XXXXXXXXXXXXXXXX';
 
   return (
     <>
-      <div className="overflow-hidden w-full rounded-2xl border border-border-gray bg-white shadow-sm">
+      <div className="flex flex-col h-full overflow-hidden w-full rounded-2xl border border-border-gray bg-white shadow-sm cursor-pointer transition-all hover:shadow-md font-dm" onClick={() => setIsModalOpen(true)}>
         <div className="relative h-60 w-full overflow-hidden rounded-t-2xl">
           <img
             src={event.banner_image || heroBG}
@@ -73,11 +68,11 @@ function EventCard({ event }: EventCardProps) {
           )}
 
             <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-sm font-semibold text-white">
-              {event.capacity - ((event as any).attendees_count || event.event_attendances_count || 0)} slots left
+              {event.capacity - (event.attendees_count || event.event_attendances_count || 0)} slots left
             </div>
           </div>
 
-          <div className="flex flex-col gap-1 p-4">
+          <div className="flex flex-1 flex-col gap-1 p-4">
             <h3 className="truncate text-lg font-semibold">{event.title}</h3>
 
             <p className="flex items-center justify-left gap-2 text-gray-500">
@@ -114,7 +109,10 @@ function EventCard({ event }: EventCardProps) {
                     bgColorClass="bg-white"
                     textColorClass="text-black"
                     className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2 text-button-lg border border-gray-200 shadow-sm"
-                    onClick={handleViewPass}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsModalOpen(true);
+                    }}
                   >
                     View Event
                   </Button>
@@ -134,11 +132,6 @@ function EventCard({ event }: EventCardProps) {
         <EventDetailsModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
-          event={event} 
-        />
-        <ViewPassModal 
-          isOpen={isPassModalOpen} 
-          onClose={() => setIsPassModalOpen(false)} 
           event={event} 
         />
     </>

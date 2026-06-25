@@ -329,7 +329,7 @@ class EventController extends Controller
                 })
                 ->when($userId, function ($q) use ($userId) {
                     $q->with(['eventAttendances' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId)->select('event_id', 'status');
+                        $query->where('user_id', $userId)->select('event_id', 'status', 'code');
                     }]);
                 })
                 ->orderBy('date', 'asc');
@@ -343,6 +343,7 @@ class EventController extends Controller
                 foreach ($items as $event) {
                     $attendance = $event->eventAttendances->first();
                     $event->user_status = $attendance ? $attendance->status : 'not_registered';
+                    $event->code = $attendance ? $attendance->code : null;
                     unset($event->eventAttendances);
                 }
             }
