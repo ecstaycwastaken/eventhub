@@ -296,30 +296,45 @@ class EventController extends Controller
             // Filter events
             $category = $request->query('category', null);
             $query = $request->query('q', null);
+            $perPage = $request->query('per_page', 10);
 
             // Fetch all events along with their categories
-            $events = Event::with('category')
-                ->withCount('eventAttendances')
+            $eventsQuery = Event::query()
+                ->with('category:id,name,color')
+                ->withCount(['eventAttendances' => function ($query) {
+                    $query->where('status', 'in', ['registered', 'attended']);
+                }])
                 ->when($category, function ($q) use ($category) {
                     $q->whereHas('category', function ($relationshipQuery) use ($category) {
                         $relationshipQuery->where('name', 'ilike', "%{$category}%");
                     });
                 })
                 ->when($query, function ($q) use ($query) {
-                    $q->where('title', 'ilike', "%{$query}%")
-                      ->orWhere('description', 'ilike', "%{$query}%");
+                    $q->where(function ($subQuery) use ($query) {
+                        $subQuery->where('title', 'ilike', "%{$query}%")
+                            ->orWhere('description', 'ilike', "%{$query}%");
+                    });
                 })
-                ->get();
+                ->orderBy('date', 'asc');
+
+            $totalEvents = (clone $eventsQuery)->count();
+
+            $events = $eventsQuery->cursorPaginate($perPage);
             
-            $categories = $events->groupBy('category.name')->map(function ($group) {
-                return $group->count();
-            });
+            // NOTE: Unused data in the frontend.
+            // $categories = $events->groupBy('category.name')->map(function ($group) {
+            //     return $group->count();
+            // });
 
             return response()->json([
                 'has_events' => !$events->isEmpty(),
-                'events' => $events,
-                'total_events' => $events->count(),
-                'categories' => $categories
+                'events' => $events->items(),
+                'pagination' => [
+                    'next_cursor' => $events->nextCursor() ? $events->nextCursor()->encode() : null,
+                    'has_more' => $events->hasMorePages(),
+                ],
+                'total_events' => $totalEvents,
+                // 'categories' => $categories
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching events: ' . $e->getMessage());

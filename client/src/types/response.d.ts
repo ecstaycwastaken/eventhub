@@ -9,10 +9,11 @@ export interface AuthResponse {
 export interface GetAllEventsResponse {
     has_events: boolean;
     events: EventWithCategory[];
+    pagination?: {
+        has_more: boolean;
+        next_cursor: string | null;
+    };
     total_events: number;
-    categories: {
-        [string]: number;
-    }
 }
 
 export interface GetAllUsersResponse {
