@@ -1,6 +1,8 @@
 <div align="center">
-  <!-- <img src="docs/logo.png" alt="Logo" width="80" height="80"> -->
-  <h1 align="center">Eventhub</h1>
+  <img width="120" height="120" alt="App Logo" src="https://github.com/user-attachments/assets/9166c960-e9e8-4d50-8e0d-5f80e294b9e3" />
+
+
+  <h1 align="center">EventHub</h1>
 
   <p align="center">
     A modern, responsive, and streamlined Event Management System.
@@ -41,7 +43,8 @@
 ## 📖 About The Project
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
-*Screenshot placeholder: Add a beautiful screenshot of the dashboard here.*
+<img width="2560" height="1600" alt="Screenshot 2026-06-25 215828" src="https://github.com/user-attachments/assets/1a78b304-91ed-4fb1-86e8-24568a277626" />
+
 
 **Eventhub** is a web-based Event Management System designed to allow administrators to seamlessly create and manage events, while enabling users to easily register, reserve slots, and check in digitally. Developed as an academic project, it focuses on delivering a streamlined and modern user experience.
 
@@ -56,6 +59,11 @@
 #### Backend & Database
 *   [PHP](https://www.php.net/) & [Laravel](https://laravel.com/) (REST API)
 *   [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
+
+### 📱 Device Support
+
+⚠️ **Important Note:** This project is officially supported only on **Windows**, **Linux**, and **Android** devices. 
+Due to strict Intelligent Tracking Prevention (ITP) policies on **iOS** (which applies to Safari, Chrome, and all other browsers on iOS), cross-site authentication cookies are aggressively blocked. This domain limitation causes authentication errors when retrieving user-specific data like registered events. iOS devices are not currently supported in production unless frontend and backend are configured on the same base domain.
 
 ## ✨ Features
 
