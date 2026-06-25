@@ -48,3 +48,23 @@ export interface EventsWithAttendance {
     capacity: number;
     attendees: Attendance[];
 }
+
+export interface ReportAttendee {
+    full_name: string;
+    email: string;
+    code: string;
+    status: 'registered' | 'attended';
+    registered_at: string;
+    checked_in_at: string | null;
+}
+
+export interface EventsReportResponse {
+    events_list: { id: string; title: string }[];
+    total_registered: number;
+    total_confirmed: number;
+    total_checked_in: number;
+    available_slots: number;
+    registration_status: { confirmed: number; checked_in: number };
+    registration_overtime: { date: string; count: number }[];
+    attendees: ReportAttendee[];
+}

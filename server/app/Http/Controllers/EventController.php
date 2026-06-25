@@ -629,53 +629,78 @@ class EventController extends Controller
     public function getEventsReport(Request $request) {
         try {
             $user = $request->user();
-            // Optional query parameter for selecting a specific event
-            $query = $request->query('event_id', null);
+            $eventIdFilter = $request->query('event_id', null);
 
-            // Fetch the events hosted by the user along with their categories and registration counts
-            $events = Event::whereHas('eventAttendances', function($query) use ($user) {
-                    $query->where('user_id', $user->id)->where('status', 'host');
+            // Fetch ALL events hosted by the user (for the dropdown list)
+            $eventsList = Event::whereHas('eventAttendances', function ($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('status', 'host');
                 })
-                ->with('category')
-                ->withCount(['eventAttendances as registrations_count' => function($query) {
-                    $query->where('status', ['registered', 'attended']);
-                }])
-                ->when($query, function ($q) use ($query) {
-                    $q->where('id', $query);
+                ->select('id', 'title')
+                ->get();
+
+            // Build the main query for events hosted by the user, optionally filtered
+            $events = Event::whereHas('eventAttendances', function ($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('status', 'host');
+                })
+                ->when($eventIdFilter, function ($q) use ($eventIdFilter) {
+                    $q->where('id', $eventIdFilter);
                 })
                 ->get();
 
-            // Calculate dashboard KPIs
-            $totalEvents = $events->count();
-            $totalRegistrations = $events->sum('registrations_count');
-            $averageRegistrations = $totalEvents > 0 ? round($totalRegistrations / $totalEvents, 2) : 0;
-
-
-            // Attendance rate calculation
             $eventIds = $events->pluck('id');
 
-            $totalAttended = EventAttendance::whereIn('event_id', $eventIds)
+            // KPI counts
+            $totalRegistered = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->count();
+
+            $totalConfirmed = EventAttendance::whereIn('event_id', $eventIds)
+                ->where('status', 'registered')
+                ->count();
+
+            $totalCheckedIn = EventAttendance::whereIn('event_id', $eventIds)
                 ->where('status', 'attended')
                 ->count();
 
-            $attendanceRate = $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100, 2) : 0;
+            $availableSlots = $events->sum('capacity') - $totalRegistered;
 
-            // Build the registrations report data
-            $registrationsReport = $events->map(function($event) {
-                return [
-                    'event_id' => $event->id,
-                    'title' => $event->title,
-                    'registrations_count' => $event->registrations_count
-                ];
-            });
+            // Registration overtime (last 30 days)
+            $registrationOvertime = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->where('created_at', '>=', Carbon::now()->subDays(30))
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get();
+
+            // Attendees list
+            $attendees = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->with('user')
+                ->get()
+                ->map(function ($attendance) {
+                    return [
+                        'full_name' => $attendance->user->full_name,
+                        'email' => $attendance->user->email,
+                        'code' => $attendance->code,
+                        'status' => $attendance->status,
+                        'registered_at' => $attendance->created_at,
+                        'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
+                    ];
+                });
 
             return response()->json([
-                'events' => $events,
-                'total_events' => $totalEvents,
-                'total_registrations' => $totalRegistrations,
-                'registrations_report' => $registrationsReport,
-                'average_registrations_per_event' => $averageRegistrations,
-                'attendance_rate' => $attendanceRate
+                'events_list' => $eventsList,
+                'total_registered' => $totalRegistered,
+                'total_confirmed' => $totalConfirmed,
+                'total_checked_in' => $totalCheckedIn,
+                'available_slots' => $availableSlots,
+                'registration_status' => [
+                    'confirmed' => $totalConfirmed,
+                    'checked_in' => $totalCheckedIn,
+                ],
+                'registration_overtime' => $registrationOvertime,
+                'attendees' => $attendees,
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events report: ' . $e->getMessage());
