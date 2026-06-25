@@ -325,11 +325,7 @@ function EventForm({ mode, eventData, id, fetchedCategories, isLoadingCategories
                     </form>
                 </main>
 
-                <PreviewSidebar 
-                    previewEvent={previewEvent} 
-                    isSubmitting={isSubmitting}
-                    mode={mode}
-                />
+                <PreviewSidebar previewEvent={previewEvent} />
             </div>
 
             {/* Delete Confirmation Modal */}
