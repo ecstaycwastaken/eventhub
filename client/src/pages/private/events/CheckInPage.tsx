@@ -198,7 +198,7 @@ function CheckInPage() {
                                             </span>
                                         ) : (
                                             <div className="flex items-center gap-3">
-                                                <span className="bg-[#1A1A1A] text-white px-3 py-1.5 rounded-md text-caption-3 font-bold">
+                                                <span className="bg-green text-white px-3 py-1.5 rounded-md text-caption-3 font-bold">
                                                     Checked In
                                                 </span>
                                                 <span className="text-gray-400 text-caption-3 font-medium">
@@ -209,7 +209,7 @@ function CheckInPage() {
 
                                         {attendee.status === "registered" && (
                                             <Button 
-                                                bgColorClass="bg-[#1A1A1A]"
+                                                bgColorClass="bg-[#C2313C]"
                                                 onClick={() => handleCheckIn(attendee.code)}
                                                 disabled={isCheckingIn}
                                                 className="flex items-center gap-2 disabled:opacity-70 disabled:hover:bg-[#1A1A1A] px-4 py-2 rounded-lg text-button-md shadow-sm"

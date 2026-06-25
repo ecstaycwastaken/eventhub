@@ -400,7 +400,7 @@ class EventController extends Controller
                 ->where('user_id', $user->id)
                 ->with('category')
                 ->withCount(['eventAttendances as attendees_count' => function ($query) {
-                    $query->where('status', 'registered');
+                    $query->whereIn('status', ['registered', 'attended']);
                 }])
                 ->when($searchQuery, function ($q) use ($searchQuery) {
                     $q->where(function ($subQuery) use ($searchQuery) {
