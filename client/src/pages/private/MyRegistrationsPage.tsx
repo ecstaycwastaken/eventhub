@@ -26,40 +26,38 @@ function MyRegistrationsPage() {
 
   return (
     <div className="flex flex-col font-dm min-h-screen px-8 md:px-20 py-10 bg-[#F9FAFB]">
-            <div className="flex flex-col w-full px-12 py-10 bg-linear-to-b from-[#A72C35] to-[#5C171C] rounded-xl mb-10 shadow-lg relative overflow-hidden">
-                <div className="relative z-10">
-                    <p className="text-white/70 text-sub-1 mb-3 font-medium uppercase tracking-wider">
-                        YOUR ACCOUNT
-                    </p>
-                    <h1 className="text-white text-heading-1 font-bold mb-8 text-4xl">
-                        My Registrations
-                    </h1>
-                    
-                    {loading ? (
-                        <Spinner size="md" variant="white" className="mt-2" />
-                    ) : (
-                        <>
-                            <h1 className="text-white text-heading-1 mb-1">
-                                {totalEvents}
-                            </h1>
-                            <p className="text-white/70 text-sub-1 tracking-widest uppercase">
-                                Total Events
-                            </p>
-                        </>
-                    )}
-                </div>
-                {/* Decorative background circle */}
-                <div className="absolute -right-20 -top-40 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="flex flex-col w-full px-12 py-10 bg-linear-to-b from-[#A72C35] to-[#5C171C] rounded-xl mb-10 shadow-lg relative overflow-hidden">
+            <div className="relative z-10">
+                <p className="text-white/70 text-sub-1 mb-3 font-medium uppercase tracking-wider">
+                    YOUR ACCOUNT
+                </p>
+                <h1 className="text-white text-heading-1 font-bold mb-8 text-4xl">
+                    My Registrations
+                </h1>
+                
+                {loading ? (
+                    <Spinner size="md" variant="white" className="mt-2" />
+                ) : (
+                    <>
+                        <h1 className="text-white text-heading-1 mb-1">
+                            {totalEvents}
+                        </h1>
+                        <p className="text-white/70 text-sub-1 tracking-widest uppercase">
+                            Total Events
+                        </p>
+                    </>
+                )}
             </div>
-
-            {/* Reusing your pre-built component! */}
-            <EventList 
-                events={events}
-                loading={loading}
-                error={errorMessage}
-            />
-            
+            <div className="absolute -right-20 -top-40 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
         </div>
+
+        <EventList 
+            events={events}
+            loading={loading}
+            error={errorMessage}
+        />
+        
+    </div>
   )
 }
 

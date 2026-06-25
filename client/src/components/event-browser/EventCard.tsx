@@ -4,8 +4,6 @@ import heroBG from '@/assets/hero-bg.png';
 import Button from '../Button';
 import EventDetailsModal from './EventDetailsModal';
 import { useAuth } from '@/hooks/useAuth';
-import { useHttp } from '@/hooks/useHttp';
-import { toast } from 'sonner';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import type { EventWithCategory } from "@/types/event";
 
@@ -19,18 +17,15 @@ function EventCard({ event }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
-  const { sendRequest: unregisterRequest, loading: isCancelling } = useHttp();
 
   const isOwner = user?.id === event.user_id;
   const isAdmin = user?.role === 'admin';
   const isInAdminPath = window.location.pathname.startsWith('/admin');
   const viewingAsAdmin = isAdmin && isInAdminPath;
   const isRegisteredPath = location.pathname.includes('/my-registrations');
-  const isRegistered = isRegisteredPath || (event as any).user_status === 'registered' || (event as any).user_status === 'attended';
 
-  const price =
-    Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
-
+  const isRegistered = isRegisteredPath || event.user_status === 'registered' || event.user_status === 'attended';
+  const price = Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
   const date = new Date(event.date)
 
   const formattedDate = date.toLocaleDateString('en-US', {
@@ -44,28 +39,12 @@ function EventCard({ event }: EventCardProps) {
     minute: '2-digit',
   })
 
-  const handleCancelRSVP = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm(`Are you sure you want to cancel your RSVP for ${event.title}?`)) {
-      try {
-        await unregisterRequest({
-          method: 'DELETE',
-          url: `/api/v1/event/registered-events/${event.id}`
-        });
-        toast.success("RSVP cancelled successfully.", {
-            classNames: { toast: 'bg-[#F1FFEB] text-[#44A872] border border-[#44A872]' }
-        });
-        window.location.reload();
-      } catch (err: any) {
-        toast.error(err.message || "Failed to cancel RSVP.");
-      }
-    }
-  };
-
   const handleViewPass = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsModalOpen(true);
   };
+
+  const userCode = event.code || event.event_attendances?.[0]?.code || 'XXXXXXXXXXXXXXXX';
 
   return (
     <>
@@ -114,7 +93,7 @@ function EventCard({ event }: EventCardProps) {
 
             {isRegistered && (
               <p className="text-gray-400 text-caption-2 tracking-wider uppercase mt-1">
-                {(event as any).code || 'EVT-XXXXXXXX'}
+                {userCode}
               </p>
             )}
 

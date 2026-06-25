@@ -116,7 +116,7 @@ function CheckInPage() {
                         </label>
                         <input 
                             type="text" 
-                            placeholder="EVT-XXXXXXXX" 
+                            placeholder="XXXXXXXXXXXXXXXX" 
                             value={manualCode}
                             onChange={(e) => setManualCode(e.target.value)}
                             className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-800 text-caption-2 rounded-lg px-4 py-3 outline-none focus:border-gray-400 transition-colors mb-4 uppercase"

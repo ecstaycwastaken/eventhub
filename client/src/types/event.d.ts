@@ -18,6 +18,9 @@ export interface Event {
 
 export interface EventWithCategory extends Event {
     category: Category;
+    user_status?: "host" | "attended" | "registered" | "not_registered";
+    code?: string | null;
+    event_attendances?: Attendance[];
 }
 
 export interface EventCreationFormData {
@@ -67,4 +70,4 @@ export interface EventsReportResponse {
     registration_status: { confirmed: number; checked_in: number };
     registration_overtime: { date: string; count: number }[];
     attendees: ReportAttendee[];
-}
+}
