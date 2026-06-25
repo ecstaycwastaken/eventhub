@@ -1,5 +1,6 @@
 import { FaCalendar, FaTags, FaUser, FaUserCheck } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
+import { IoMdArrowBack } from "react-icons/io";
 import SidebarLink from "./SidebarLink";
 
 interface SidebarProps {
@@ -19,12 +20,20 @@ function Sidebar({ collapsed }: SidebarProps) {
         }
       </div>
 
-      <nav className="flex flex-col px-3 gap-2">
+      <nav className="flex flex-col px-3 gap-2 h-full">
         <SidebarLink path="/admin" icon={FaChartSimple} label="Dashboard" collapsed={collapsed} />
         <SidebarLink path="/admin/events" icon={FaCalendar} label="Events" collapsed={collapsed} />
         <SidebarLink path="/admin/users" icon={FaUser} label="Users" collapsed={collapsed} />
         <SidebarLink path="/admin/attendances" icon={FaUserCheck} label="Attendances" collapsed={collapsed} />
         <SidebarLink path="/admin/categories" icon={FaTags} label="Categories" collapsed={collapsed} />
+        <div className="mt-auto mb-4">
+          <SidebarLink
+            path="/u/events"
+            icon={IoMdArrowBack}
+            label="Return to EventHub"
+            collapsed={collapsed}
+          />
+        </div>
       </nav>
     </aside>
   )
