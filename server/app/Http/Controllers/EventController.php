@@ -348,20 +348,44 @@ class EventController extends Controller
     public function getMyEvents(Request $request) {
         try {
             $user = $request->user();
+            
+            // Optional query parameter to specify which columns to retrieve. Default to all columns if not provided.
+            $columns = $request->query('columns');
 
-            // Fetch the events created by the user along with their categories
-            $events = Event::where('user_id', $user->id)->with('category')->get();
+            // If columns are provided as a comma-separated string, convert it to an array
+            if (is_string($columns)) {
+                $columns = array_map('trim', explode(',', $columns));
+            }
+
+            if (!is_array($columns) || empty($columns)) {
+                $columns = ['id', 'title', 'description', 'date', 'venue', 'category_id', 'capacity', 'price', 'banner_image'];
+            } else {
+                // Force include essential keys for relationships to work
+                if (!in_array('id', $columns)) $columns[] = 'id';
+                if (!in_array('category_id', $columns)) $columns[] = 'category_id';
+                if (!in_array('user_id', $columns)) $columns[] = 'user_id'; 
+            }
+
+            // Fetch events hosted by the user along with their categories and attendee counts
+            $events = Event::select($columns)
+                ->where('user_id', $user->id)
+                ->with('category')
+                ->withCount(['eventAttendances as attendees_count' => function ($query) {
+                    $query->where('status', 'registered');
+                }])
+                ->get();
+
+            // Append host name to each event (the host is the current user)
             $events->each(function($event) {
                 $event->host_name = $event->getEventHost();
-                $event->attendees_count = $event->eventAttendances()->where('status', 'registered')->count();
             });
 
-            // Return success whether the user has events or not, along with the events data
             return response()->json([
-                'has_events' => !$events->isEmpty(),
+                'has_events' => $events->isNotEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
             ]);
+
         } catch (\Exception $e) {
             Log::error('Error fetching my events: ' . $e->getMessage());
             return response()->json([
@@ -605,48 +629,78 @@ class EventController extends Controller
     public function getEventsReport(Request $request) {
         try {
             $user = $request->user();
+            $eventIdFilter = $request->query('event_id', null);
 
-            // Fetch the events hosted by the user along with their categories and registration counts
-            $events = Event::whereHas('eventAttendances', function($query) use ($user) {
-                    $query->where('user_id', $user->id)->where('status', 'host');
+            // Fetch ALL events hosted by the user (for the dropdown list)
+            $eventsList = Event::whereHas('eventAttendances', function ($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('status', 'host');
                 })
-                ->with('category')
-                ->withCount(['eventAttendances as registrations_count' => function($query) {
-                    $query->where('status', ['registered', 'attended']);
-                }])
+                ->select('id', 'title')
                 ->get();
 
-            // Calculate dashboard KPIs
-            $totalEvents = $events->count();
-            $totalRegistrations = $events->sum('registrations_count');
-            $averageRegistrations = $totalEvents > 0 ? round($totalRegistrations / $totalEvents, 2) : 0;
+            // Build the main query for events hosted by the user, optionally filtered
+            $events = Event::whereHas('eventAttendances', function ($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('status', 'host');
+                })
+                ->when($eventIdFilter, function ($q) use ($eventIdFilter) {
+                    $q->where('id', $eventIdFilter);
+                })
+                ->get();
 
-
-            // Attendance rate calculation
             $eventIds = $events->pluck('id');
 
-            $totalAttended = EventAttendance::whereIn('event_id', $eventIds)
+            // KPI counts
+            $totalRegistered = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->count();
+
+            $totalConfirmed = EventAttendance::whereIn('event_id', $eventIds)
+                ->where('status', 'registered')
+                ->count();
+
+            $totalCheckedIn = EventAttendance::whereIn('event_id', $eventIds)
                 ->where('status', 'attended')
                 ->count();
 
-            $attendanceRate = $totalRegistrations > 0 ? round(($totalAttended / $totalRegistrations) * 100, 2) : 0;
+            $availableSlots = $events->sum('capacity') - $totalRegistered;
 
-            // Build the registrations report data
-            $registrationsReport = $events->map(function($event) {
-                return [
-                    'event_id' => $event->id,
-                    'title' => $event->title,
-                    'registrations_count' => $event->registrations_count
-                ];
-            });
+            // Registration overtime (last 30 days)
+            $registrationOvertime = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->where('created_at', '>=', Carbon::now()->subDays(30))
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get();
+
+            // Attendees list
+            $attendees = EventAttendance::whereIn('event_id', $eventIds)
+                ->whereIn('status', ['registered', 'attended'])
+                ->with('user')
+                ->get()
+                ->map(function ($attendance) {
+                    return [
+                        'full_name' => $attendance->user->full_name,
+                        'email' => $attendance->user->email,
+                        'code' => $attendance->code,
+                        'status' => $attendance->status,
+                        'registered_at' => $attendance->created_at,
+                        'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
+                    ];
+                });
 
             return response()->json([
-                'events' => $events,
-                'total_events' => $totalEvents,
-                'total_registrations' => $totalRegistrations,
-                'registrations_report' => $registrationsReport,
-                'average_registrations_per_event' => $averageRegistrations,
-                'attendance_rate' => $attendanceRate
+                'events_list' => $eventsList,
+                'total_registered' => $totalRegistered,
+                'total_confirmed' => $totalConfirmed,
+                'total_checked_in' => $totalCheckedIn,
+                'available_slots' => $availableSlots,
+                'registration_status' => [
+                    'confirmed' => $totalConfirmed,
+                    'checked_in' => $totalCheckedIn,
+                ],
+                'registration_overtime' => $registrationOvertime,
+                'attendees' => $attendees,
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching my events report: ' . $e->getMessage());
@@ -657,59 +711,60 @@ class EventController extends Controller
         }
     }
 
-    public function getEventReport(Request $request, string $id) {
-        try {
-            $user = $request->user();
-            $event = Event::with('category')->findOrFail($id);
+    // NOTE: This method is currently not in used.
+    // public function getEventReport(Request $request, string $id) {
+    //     try {
+    //         $user = $request->user();
+    //         $event = Event::with('category')->findOrFail($id);
 
-            // Check if the authenticated user is the host of the event
-            $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
-            $authorized = ($attendance && $attendance->isEventHost()) || $user->role === 'admin';
-            if (!$authorized) {
-                return response()->json(['message' => 'Unauthorized. Only the event host or admin can view this report.'], 403);
-            }
+    //         // Check if the authenticated user is the host of the event
+    //         $attendance = EventAttendance::where('event_id', $id)->where('user_id', $user->id)->first();
+    //         $authorized = ($attendance && $attendance->isEventHost()) || $user->role === 'admin';
+    //         if (!$authorized) {
+    //             return response()->json(['message' => 'Unauthorized. Only the event host or admin can view this report.'], 403);
+    //         }
 
-            // Fetch all attendees for the event along with their attendance status
-            $attendees = EventAttendance::with('user')->where('event_id', $id)->where('status', '<>', 'host')->get();
-            $total_registered = $attendees->where('status', 'registered', 'attended')->count();
-            $total_attended = $attendees->where('status', 'attended')->count();
+    //         // Fetch all attendees for the event along with their attendance status
+    //         $attendees = EventAttendance::with('user')->where('event_id', $id)->where('status', '<>', 'host')->get();
+    //         $total_registered = $attendees->where('status', 'registered', 'attended')->count();
+    //         $total_attended = $attendees->where('status', 'attended')->count();
 
-            // Build attendees data with user details and attendance status
-            $attendeesData = $attendees->map(function ($attendance) {
-                return [
-                    'user_id' => $attendance->user_id,
-                    'full_name' => $attendance->user->getFullNameAttribute(),
-                    'status' => $attendance->status,
-                    'code' => $attendance->code,
-                    'registered_at' => $attendance->created_at,
-                    'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
-                ];
-            });
+    //         // Build attendees data with user details and attendance status
+    //         $attendeesData = $attendees->map(function ($attendance) {
+    //             return [
+    //                 'user_id' => $attendance->user_id,
+    //                 'full_name' => $attendance->user->getFullNameAttribute(),
+    //                 'status' => $attendance->status,
+    //                 'code' => $attendance->code,
+    //                 'registered_at' => $attendance->created_at,
+    //                 'checked_in_at' => $attendance->status === 'attended' ? $attendance->updated_at : null,
+    //             ];
+    //         });
 
-            // Registration overtime data
-            $registrationOvertime = EventAttendance::selectRaw('DATE(created_at) as registration_date, COUNT(*) as registrations_count')
-                ->where('event_id', $id)
-                ->where('created_at', '>=', Carbon::now()->subDays(30)) // Last 30 days
-                ->where('status', 'attended')->orWhere('status', 'registered') // Exclude hosts from the report
-                ->groupBy('registration_date')
-                ->orderBy('registration_date', 'asc')
-                ->get();
+    //         // Registration overtime data
+    //         $registrationOvertime = EventAttendance::selectRaw('DATE(created_at) as registration_date, COUNT(*) as registrations_count')
+    //             ->where('event_id', $id)
+    //             ->where('created_at', '>=', Carbon::now()->subDays(30)) // Last 30 days
+    //             ->where('status', 'attended')->orWhere('status', 'registered') // Exclude hosts from the report
+    //             ->groupBy('registration_date')
+    //             ->orderBy('registration_date', 'asc')
+    //             ->get();
 
-            return response()->json([
-                'attendees' => $attendeesData,
-                'total_registered' => $total_registered,
-                'total_checked_in' => $total_attended,
-                'total_capacity' => $event->capacity,
-                'registration_overtime' => $registrationOvertime
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['message' => 'Event not found.'], 404);
-        } catch (\Exception $e) {
-            Log::error('Error fetching event report: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An unexpected error occurred while fetching the event report.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'attendees' => $attendeesData,
+    //             'total_registered' => $total_registered,
+    //             'total_checked_in' => $total_attended,
+    //             'total_capacity' => $event->capacity,
+    //             'registration_overtime' => $registrationOvertime
+    //         ]);
+    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+    //         return response()->json(['message' => 'Event not found.'], 404);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error fetching event report: ' . $e->getMessage());
+    //         return response()->json([
+    //             'message' => 'An unexpected error occurred while fetching the event report.',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+    //         ], 500);
+    //     }
+    // }
 }

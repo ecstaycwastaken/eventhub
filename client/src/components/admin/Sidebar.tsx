@@ -28,8 +28,12 @@ const defaultAdminLinks: NavLinkItem[] = [
 
 function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLinks, onToggle }: SidebarProps) {
   return (
-    <aside className={`sticky left-0 top-0 border-r border-border bg-bg-page h-[calc(100vh-70px)] transition-all duration-300 flex flex-col z-20 ${collapsed ? "w-18" : "w-64"}`}>
-      <div className="flex items-center h-16 border-b border-border px-5 mb-4 gap-4">
+    <aside className={`
+      fixed bottom-0 left-0 right-0 z-50 bg-bg-page border-t border-border flex flex-row h-16
+      md:sticky md:top-0 md:h-[calc(100vh-70px)] md:flex-col md:border-r md:border-t-0 md:transition-all md:duration-300 md:z-20
+      ${collapsed ? "md:w-18" : "md:w-64"}
+    `}>
+      <div className="hidden md:flex items-center h-16 border-b border-border px-5 mb-4 gap-4">
         {onToggle && (
             <button onClick={onToggle} className="text-gray-500 hover:text-black transition-colors shrink-0">
                 <FiMenu size={20} />
@@ -41,7 +45,7 @@ function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLin
         )}
       </div>
 
-      <nav className="flex flex-col px-3 gap-2 h-full">
+      <nav className="flex flex-row md:flex-col justify-around md:justify-start px-1 md:px-3 gap-1 md:gap-2 h-full md:h-auto w-full flex-1">
         {links.map((link) => (
           <SidebarLink 
             key={link.path}
@@ -51,11 +55,11 @@ function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLin
             collapsed={collapsed}
           />
         ))}
-        <div className="mt-auto mb-4">
+        <div className="md:mt-auto md:mb-4 flex flex-1 md:flex-none">
           <SidebarLink
             path="/u/events"
             icon={IoMdArrowBack}
-            label="Return to EventHub"
+            label="Return"
             collapsed={collapsed}
           />
         </div>

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import Button from '@/components/Button';
 import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/hooks/useAuth';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
 
 interface NavbarProps {
   onOpenSignIn?: () => void;
@@ -12,6 +12,7 @@ interface NavbarProps {
 const Navbar = ({ onOpenSignIn }: NavbarProps) => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const displayName = user?.username || user?.first_name || 'User';
   const initial = displayName.charAt(0).toUpperCase();
@@ -55,7 +56,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
             </div>
           )}
 
-          <div className='flex justify-end font-dm shrink-0'>
+          <div className='flex items-center justify-end gap-3 font-dm shrink-0'>
             {!isAuthenticated ? (
               <Button
                 bgColorClass="bg-brand-red"
@@ -105,9 +106,48 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
                 )}
               </div>
             )}
+
+            {isAuthenticated && (
+              <button 
+                className='md:hidden text-gray-600 hover:text-gray-900 focus:outline-none ml-1 flex items-center justify-center h-8 w-8'
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {isAuthenticated && isMobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white px-5 py-4 flex flex-col gap-2 font-dm absolute top-full w-full left-0 shadow-md z-40">
+          <NavLink
+            to='/u/events'
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={({ isActive }: { isActive: boolean }) => `block px-4 py-3 text-sm font-semibold rounded-lg transition-colors 
+            ${isActive ? 'bg-brand-red text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+          >
+            Browse Events
+          </NavLink>
+          <NavLink
+            to='/u/my-registrations'
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={({ isActive }: { isActive: boolean }) => `block px-4 py-3 text-sm font-semibold rounded-lg transition-colors 
+            ${isActive ? 'bg-brand-red text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+          >
+            My Registration
+          </NavLink>
+          <NavLink
+            to='/u/my-events'
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={({ isActive }: { isActive: boolean }) => `block px-4 py-3 text-sm font-semibold rounded-lg transition-colors 
+            ${isActive ? 'bg-brand-red text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+          >
+            My Events
+          </NavLink>
+        </div>
+      )}
     </nav>
   )
 }
