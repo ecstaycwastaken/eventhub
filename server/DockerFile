@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install dependencies and PostgreSQL drivers
+# Install system dependencies and required PHP extensions
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libpng-dev \
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql zip
+    && docker-php-ext-install pdo pdo_pgsql pgsql zip bcmath gd
 
 # Enable Apache mod_rewrite for Laravel URLs
 RUN a2enmod rewrite
@@ -23,13 +23,14 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Grant Composer unlimited memory and run in non-interactive mode
+ENV COMPOSER_MEMORY_LIMIT=-1
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Give Laravel permission to write to storage
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Point Apache to Laravel's public folder (No more .htaccess loops!)
+# Point Apache to Laravel's public folder
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
