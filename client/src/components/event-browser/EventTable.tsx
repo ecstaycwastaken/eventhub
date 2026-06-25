@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { IoMdAlert } from "react-icons/io";
 import type { EventWithCategory } from "@/types/event";
