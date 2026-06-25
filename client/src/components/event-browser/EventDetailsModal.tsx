@@ -61,6 +61,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                     }
                 });
                 onClose();
+                window.dispatchEvent(new Event('rsvp-changed'));
             }
         } catch (err: any) {
             toast.error(err.message || "Failed to register for the event.");
@@ -78,7 +79,9 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                 url: `/api/v1/event/registered-events/${event.id}`
             });
             toast.success("RSVP cancelled successfully.");
-            window.location.reload();
+            window.dispatchEvent(new Event('rsvp-changed'));
+            setIsCancelModalOpen(false);
+            onClose();
         } catch (err: any) {
             toast.error(err.message || "Failed to cancel RSVP.");
             setIsCancelModalOpen(false);
