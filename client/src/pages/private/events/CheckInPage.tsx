@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { AttendanceData } from "@/types/attendee";
 import { useHttp } from "@/hooks";
 import { Spinner } from "@/components/ui/spinner";
+import Button from "@/components/Button";
 
 interface EventOption {
     id: number | string;

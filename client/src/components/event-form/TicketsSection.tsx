@@ -36,6 +36,7 @@ function TicketsSection({ formData, handleChange }: {
                             type="number"
                             name="price"
                             id="price"
+                            min="0"
                             value={formData.price}
                             onChange={(e) => handleChange("price", e.target.value)}
                             required 
@@ -52,6 +53,7 @@ function TicketsSection({ formData, handleChange }: {
                     type="number"
                     name="capacity"
                     id="capacity"
+                    min="0"
                     value={formData.capacity}
                     onChange={(e) => handleChange("capacity", e.target.value)}
                     required 

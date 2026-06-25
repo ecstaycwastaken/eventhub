@@ -23,10 +23,10 @@ class EventController extends Controller
                 'title' => 'required|string',
                 'description' => 'required|string',
                 'category' => 'required|exists:event_categories,id',
-                'date' => 'required|date',
+                'date' => 'required|date|after_or_equal:today',
                 'venue' => 'required|string',
-                'capacity' => 'required|integer',
-                'price' => 'required|numeric',
+                'capacity' => 'required|integer|min:0',
+                'price' => 'required|numeric|min:0',
             ]);
 
             $user = $request->user();
@@ -112,10 +112,10 @@ class EventController extends Controller
                 'title' => 'sometimes|required|string',
                 'description' => 'sometimes|required|string',
                 'category' => 'sometimes|required|exists:event_categories,id',
-                'date' => 'sometimes|required|date',
+                'date' => 'sometimes|required|date|after_or_equal:today',
                 'venue' => 'sometimes|required|string',
-                'capacity' => 'sometimes|required|integer',
-                'price' => 'sometimes|required|numeric',
+                'capacity' => 'sometimes|required|integer|min:0',
+                'price' => 'sometimes|required|numeric|min:0',
             ]);
 
             $bannerUrl = $event->banner_image;
@@ -302,7 +302,7 @@ class EventController extends Controller
             $eventsQuery = Event::query()
                 ->with('category:id,name,color')
                 ->withCount(['eventAttendances' => function ($query) {
-                    $query->where('status', 'in', ['registered', 'attended']);
+                    $query->whereIn('status', ['registered', 'attended']);
                 }])
                 ->when($category, function ($q) use ($category) {
                     $q->whereHas('category', function ($relationshipQuery) use ($category) {
@@ -348,6 +348,8 @@ class EventController extends Controller
     public function getMyEvents(Request $request) {
         try {
             $user = $request->user();
+            $searchQuery = $request->query('q', null);
+            $perPage = $request->query('per_page', 5);
             
             // Optional query parameter to specify which columns to retrieve. Default to all columns if not provided.
             $columns = $request->query('columns');
@@ -367,23 +369,33 @@ class EventController extends Controller
             }
 
             // Fetch events hosted by the user along with their categories and attendee counts
-            $events = Event::select($columns)
+            $eventsQuery = Event::select($columns)
                 ->where('user_id', $user->id)
                 ->with('category')
                 ->withCount(['eventAttendances as attendees_count' => function ($query) {
                     $query->where('status', 'registered');
                 }])
-                ->get();
+                ->when($searchQuery, function ($q) use ($searchQuery) {
+                    $q->where(function ($subQuery) use ($searchQuery) {
+                        $subQuery->where('title', 'ilike', "%{$searchQuery}%")
+                            ->orWhere('description', 'ilike', "%{$searchQuery}%");
+                    });
+                })
+                ->orderBy('date', 'desc');
+
+            $paginator = $eventsQuery->paginate($perPage);
 
             // Append host name to each event (the host is the current user)
-            $events->each(function($event) {
+            $events = collect($paginator->items())->each(function($event) {
                 $event->host_name = $event->getEventHost();
             });
 
             return response()->json([
                 'has_events' => $events->isNotEmpty(),
                 'events' => $events,
-                'total_events' => $events->count(),
+                'total_events' => $paginator->total(),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
             ]);
 
         } catch (\Exception $e) {

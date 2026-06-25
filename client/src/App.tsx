@@ -1,10 +1,14 @@
+import { lazy, Suspense } from 'react';
 import {
   Route,
   createBrowserRouter,
   createRoutesFromElements,
-  RouterProvider
+  RouterProvider,
+  Outlet
 } from "react-router-dom";
 import { Toaster } from 'sonner';
+
+import { Spinner } from "@/components/ui/spinner";
 
 import AuthGuard from "@/components/auth/AuthGuard"
 import AuthProvider from "@/context/auth/AuthProvider";
@@ -14,31 +18,40 @@ import AdminLayout from "./layouts/AdminLayout";
 import HomeLayout from "./layouts/HomeLayout";
 import EventsLayout from "./layouts/EventsLayout";
 
-import LandingPage from "@/pages/public/LandingPage"
-import UnauthorizedPage from "@/pages/public/UnauthorizedPage"
-import NotFoundPage from "@/pages/public/NotFoundPage"
+const LandingPage = lazy(() => import("@/pages/public/LandingPage"));
+const UnauthorizedPage = lazy(() => import("@/pages/public/UnauthorizedPage"));
+const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"));
 
-import HomePage from "@/pages/private/HomePage";
-import EventFormPage from "@/pages/private/events/EventFormPage";
-import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
-import MyEventsPage from "@/pages/private/MyEventsPage";
-import EditMyEventPage from "@/pages/private/events/EditMyEventPage";
-import CheckInPage from "@/pages/private/events/CheckInPage";
-import ReportsPage from "@/pages/private/events/ReportsPage";
+const HomePage = lazy(() => import("@/pages/private/HomePage"));
+const EventFormPage = lazy(() => import("@/pages/private/events/EventFormPage"));
+const MyRegistrationsPage = lazy(() => import("@/pages/private/MyRegistrationsPage"));
+const MyEventsPage = lazy(() => import("@/pages/private/MyEventsPage"));
+const EditMyEventPage = lazy(() => import("@/pages/private/events/EditMyEventPage"));
+const CheckInPage = lazy(() => import("@/pages/private/events/CheckInPage"));
+const ReportsPage = lazy(() => import("@/pages/private/events/ReportsPage"));
 
+const AdminAttendancesPage = lazy(() => import("@/pages/private/admin/AttendancesPage"));
+const AdminCategoriesPage = lazy(() => import("@/pages/private/admin/CategoriesPage"));
+const AdminDashboardPage = lazy(() => import("@/pages/private/admin/DashboardPage"));
+const AdminEventsPage = lazy(() => import("@/pages/private/admin/EventsPage"));
+const AdminUsersPage = lazy(() => import("@/pages/private/admin/UsersPage"));
+const AdminEditEventPage = lazy(() => import("@/pages/private/admin/EditEventPage"));
 
-import { 
-  AdminAttendancesPage,
-  AdminCategoriesPage,
-  AdminDashboardPage, 
-  AdminEventsPage, 
-  AdminUsersPage, 
-  AdminEditEventPage 
-} from "@/pages/private/admin";
+const GlobalSuspenseFallback = () => (
+  <div className="flex items-center justify-center min-h-screen bg-[#F9FAFB]">
+    <Spinner size="lg" />
+  </div>
+);
+
+const SuspenseLayout = () => (
+  <Suspense fallback={<GlobalSuspenseFallback />}>
+    <Outlet />
+  </Suspense>
+);
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <>
+    <Route element={<SuspenseLayout />}>
       {/* Public Routes */}
       <Route path='/' element={<LandingLayout />}>
         <Route index element={<LandingPage />} />
@@ -77,7 +90,7 @@ const router = createBrowserRouter(
 
       {/* Wildcard 404 Route */}
       <Route path='*' element={<NotFoundPage />} />
-    </>
+    </Route>
   )
 )
 
