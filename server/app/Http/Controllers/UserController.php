@@ -116,6 +116,32 @@ class UserController extends Controller
                 }
             }
 
+            // Update in auth.users table using Supabase API
+            $response = Http::withHeaders([
+                'apikey' => env('SUPABASE_SERVICE_KEY'),
+                'Authorization' => 'Bearer ' . env('SUPABASE_SERVICE_KEY'),
+            ])->put(env('SUPABASE_URL') . '/auth/v1/admin/users/' . $user->id, [
+                'user_metadata' => [
+                    'first_name' => $request->input('first_name', $user->first_name),
+                    'last_name' => $request->input('last_name', $user->last_name),
+                    'contact_number' => $request->input('contact_number', $user->contact_number),
+                    'country' => $request->input('country', $user->country),
+                    'region' => $request->input('region', $user->region),
+                    'city' => $request->input('city', $user->city),
+                    'role' => $request->input('role', $user->role),
+                ],
+            ]);
+
+            if ($response->failed()) {
+                $errorData = $response->json();
+                $errorMessage = $errorData['message'] ?? 'Failed to update user in authentication system.';
+                Log::error('Error updating user in Supabase Auth: ' . $errorMessage);
+                return response()->json([
+                    'message' => 'Failed to update user in authentication system.',
+                    'error' => $errorMessage
+                ], 500);
+            }
+
             $user->update($request->only(['first_name', 'last_name', 'contact_number', 'country', 'region', 'city', 'role']));
             return response()->json([
                 'message' => 'User updated successfully.'
