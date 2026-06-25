@@ -17,7 +17,11 @@ function SidebarLink({label, icon, path, collapsed}: SidebarLinkProps) {
   const normalizedCurrent = pathname.replace(/\/$/, "");
   const isActive = path !== '#' && (
     normalizedCurrent === normalizedPath || 
-    (normalizedPath !== '/admin' && normalizedCurrent.startsWith(normalizedPath + '/'))
+    (
+      normalizedPath !== '/admin' &&
+      normalizedPath !== '/u/my-events' && 
+      normalizedCurrent.startsWith(normalizedPath + '/')
+    )
   );
 
   return (
