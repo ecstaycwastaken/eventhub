@@ -563,7 +563,7 @@ class EventController extends Controller
 
             // Check if the date today is the same as the event date
             $today = Carbon::now()->toDateString();
-            if ($today !== $event->date->toDateString()) {
+            if ($today !== $eventDate->toDateString()) {
                 return response()->json(['message' => 'Check-in is only allowed on the event date.'], 400);
             }
 

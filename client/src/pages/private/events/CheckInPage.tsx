@@ -19,7 +19,13 @@ function CheckInPage() {
 
     const { data: eventsRes, sendRequest: fetchEvents, loading: loadingEvents } = useHttp<{events: EventOption[]}>();
     const { data: attendanceData, sendRequest: fetchAttendance, loading: loadingAttendance } = useHttp<AttendanceData>();
-    const { sendRequest: checkInRequest, loading: isCheckingIn } = useHttp();
+    const { sendRequest: checkInRequest, loading: isCheckingIn, error: checkInError } = useHttp();
+
+    useEffect(() => {
+        if (checkInError?.message) {
+            toast.error(checkInError.message);
+        }
+    }, [checkInError]);
 
     useEffect(() => {
         fetchEvents({ 
@@ -60,8 +66,6 @@ function CheckInPage() {
                     method: 'GET', 
                     url: `/api/v1/event/attendance/${effectiveEventId}` 
                 });
-            } else {
-                toast.error("Failed to check in. Please verify the code.");
             }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
@@ -69,10 +73,16 @@ function CheckInPage() {
         }
     };
 
-    const filteredAttendees = (attendanceData?.attendees || []).filter(attendee =>
-        attendee.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        attendee.code.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredAttendees = (attendanceData?.attendees || [])
+        .filter(attendee =>
+            attendee.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            attendee.code.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            if (a.status === 'attended' && b.status !== 'attended') return 1;
+            if (a.status !== 'attended' && b.status === 'attended') return -1;
+            return 0;
+        });
 
     const formatTime = (dateString: string | null) => {
         if (!dateString) return "";
