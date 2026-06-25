@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,6 +12,12 @@ function PublicLayout() {
     setAuthTab(tab)
     setIsAuthModalOpen(true)
   }
+
+  useEffect(() => {
+    const handleOpenAuth = () => openAuthModal('signin');
+    window.addEventListener('open-auth-modal', handleOpenAuth);
+    return () => window.removeEventListener('open-auth-modal', handleOpenAuth);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFFFF]">

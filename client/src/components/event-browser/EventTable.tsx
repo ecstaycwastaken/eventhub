@@ -82,7 +82,7 @@ function EventTable({
                     const date = new Date(event.date);
                     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     
-                    const attendeesCount = event.event_attendances_count || 0;
+                    const attendeesCount = (event as any).attendees_count || event.event_attendances_count || 0;
                     const fillPercentage = Math.min((attendeesCount / event.capacity) * 100, 100);
 
                     return (

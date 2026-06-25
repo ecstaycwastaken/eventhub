@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import Button from '@/components/Button';
 import logoImg from '@/assets/logo.png';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,7 +44,9 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
     <nav className='border-b border-b-foreground bg-background sticky top-0 z-50'>
       <div className="mx-auto max-w-7xl px-5">
         <div className='flex h-16 items-center justify-between'>
-          <img className='h-7' src={logoImg} alt='Eventhub logo' />
+          <Link to="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+            <img className='h-7' src={logoImg} alt='Eventhub logo' />
+          </Link>
 
           {isAuthenticated && (
             <div className='hidden md:flex items-center gap-2 font-dm'>

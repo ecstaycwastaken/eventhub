@@ -14,10 +14,16 @@ function MyRegistrationsPage() {
     const { data, loading, error, sendRequest } = useHttp<RegisteredEventsResponse>();
 
     useEffect(() => {
-        sendRequest({
-            method: 'GET',
-            url: '/api/v1/event/registered-events'
-        });
+        const fetchRegistrations = () => {
+            sendRequest({
+                method: 'GET',
+                url: '/api/v1/event/registered-events'
+            });
+        };
+        fetchRegistrations();
+
+        window.addEventListener('rsvp-changed', fetchRegistrations);
+        return () => window.removeEventListener('rsvp-changed', fetchRegistrations);
     }, [sendRequest]);
 
     const events = data?.events || [];

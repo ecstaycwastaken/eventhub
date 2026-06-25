@@ -11,6 +11,8 @@ export interface Event {
     capacity: number;
     price: number;
     banner_image: string;
+    attendees_count?: number | null;
+    user_status?: "host" | "attended" | "registered" | "not_registered";
     event_attendances_count?: number | null;
     created_at: string;
     updated_at: string;

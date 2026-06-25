@@ -11,7 +11,7 @@ const HomePage = () => {
       <EventBrowser 
         greeting={`HELLO, ${firstName} 👋`}
         mainTitle="What are you looking for?"
-        showStats={false}
+        showStats={true}
       />
     </>
   )

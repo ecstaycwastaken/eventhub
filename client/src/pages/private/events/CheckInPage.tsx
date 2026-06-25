@@ -60,6 +60,8 @@ function CheckInPage() {
                     method: 'GET', 
                     url: `/api/v1/event/attendance/${effectiveEventId}` 
                 });
+            } else {
+                toast.error("Failed to check in. Please verify the code.");
             }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {

@@ -123,6 +123,12 @@ export default function EventBrowser({
       await fetchEvents(null);
     };
     loadInitialEvents();
+
+    const handleRsvpChange = () => {
+      fetchEvents(null);
+    };
+    window.addEventListener('rsvp-changed', handleRsvpChange);
+    return () => window.removeEventListener('rsvp-changed', handleRsvpChange);
   }, [fetchEvents]);
 
   useEffect(() => {
