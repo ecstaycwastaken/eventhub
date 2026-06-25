@@ -1,33 +1,37 @@
 FROM php:8.2-apache
 
 # Install system dependencies and required PHP extensions
+# Added intl, dom, and xml which are commonly required by modern Laravel packages
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libpng-dev \
     libzip-dev \
+    libicu-dev \
+    libxml2-dev \
     zip \
     unzip \
     git \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql zip bcmath gd
+    && docker-php-ext-install pdo pdo_pgsql pgsql zip bcmath gd intl dom xml
 
 # Enable Apache mod_rewrite for Laravel URLs
 RUN a2enmod rewrite
 
-# Install Composer
+# Install Composer from the official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy application files from your repository
 COPY . .
 
-# Grant Composer unlimited memory and run in non-interactive mode
+# Grant Composer unlimited memory and run in non-interactive mode with verbose output (-v)
+# The -v flag will help us identify exactly which package fails if it crashes again
 ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader --no-dev -v
 
-# Give Laravel permission to write to storage
+# Give Laravel permission to write to storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Point Apache to Laravel's public folder
