@@ -46,11 +46,11 @@ Route::prefix('v1')->group(function () {
         Route::put('/update/{id}', [EventController::class, 'updateEvent'])->name('events.update');
         Route::delete('/delete/{id}', [EventController::class, 'deleteEvent'])->name('events.delete');
         Route::get('/my-events', [EventController::class, 'getMyEvents'])->name('events.my-events');
+        Route::get('/registered-events', [EventController::class, 'getRegisteredEvents'])->name('events.registered-events');
         Route::get('/{id}', [EventController::class, 'getEventById'])->name('events.details');
         Route::get('/view-pass/{id}', [EventController::class, 'getEventViewPass'])->name('events.view-pass');
         Route::get('/attendance/{id}', [EventController::class, 'getEventAttendance'])->name('events.attendance');
         Route::get('/my-events/report', [EventController::class, 'getEventsReport'])->name('events.events-report');
-        Route::get('/registered-events', [EventController::class, 'getRegisteredEvents'])->name('events.registered-events');
         // NOTE: The following route is currently not in use. It was intended to fetch a report for a specific event by its ID, but the implementation has been commented out in the controller.
         // Route::get('/my-events/report/{id}', [EventController::class, 'getEventReport'])->name('events.event-report');
         Route::delete('/attendance/{id}', [EventController::class, 'deleteAttendanceById'])->name('events.delete-attendance');
