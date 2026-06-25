@@ -400,7 +400,7 @@ class EventController extends Controller
                 ->where('user_id', $user->id)
                 ->with('category')
                 ->withCount(['eventAttendances as attendees_count' => function ($query) {
-                    $query->where('status', 'registered');
+                    $query->whereIn('status', ['registered', 'attended']);
                 }])
                 ->when($searchQuery, function ($q) use ($searchQuery) {
                     $q->where(function ($subQuery) use ($searchQuery) {
@@ -553,6 +553,18 @@ class EventController extends Controller
 
             if (!$attendance) {
                 return response()->json(['message' => 'Invalid check-in code.'], 400);
+            }
+
+            // Check if the event has already occurred (i.e., the event date is in the past)
+            $eventDate = Carbon::parse($event->date);
+            if ($eventDate->isPast()) {
+                return response()->json(['message' => 'Check-in is not allowed for past events.'], 400);
+            }
+
+            // Check if the date today is the same as the event date
+            $today = Carbon::now()->toDateString();
+            if ($today !== $event->date->toDateString()) {
+                return response()->json(['message' => 'Check-in is only allowed on the event date.'], 400);
             }
 
             // Update the attendance status to 'attended'

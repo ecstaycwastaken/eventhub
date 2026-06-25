@@ -30,6 +30,19 @@ function MyRegistrationsPage() {
     const totalEvents = data?.total_events || 0;
     const errorMessage = error ? (error.message || "Failed to load events") : null;
 
+    const now = new Date();
+    const upcomingEvents = events.filter(e => {
+        const status = e.user_status || e.event_attendances?.[0]?.status;
+        const eventDate = new Date(e.date);
+        return status === 'registered' && eventDate >= now;
+    });
+
+    const pastEvents = events.filter(e => {
+        const status = e.user_status || e.event_attendances?.[0]?.status;
+        const eventDate = new Date(e.date);
+        return status === 'attended' || eventDate < now;
+    });
+
   return (
     <div className="flex flex-col font-dm min-h-screen px-8 md:px-20 py-10 bg-[#F9FAFB]">
         <div className="flex flex-col w-full px-12 py-10 bg-linear-to-b from-[#A72C35] to-[#5C171C] rounded-xl mb-10 shadow-lg relative overflow-hidden">
@@ -57,11 +70,25 @@ function MyRegistrationsPage() {
             <div className="absolute -right-20 -top-40 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl pointer-events-none"></div>
         </div>
 
-        <EventList 
-            events={events}
-            loading={loading}
-            error={errorMessage}
-        />
+        <div className="w-full mb-8">
+            <h2 className="text-2xl font-bold mb-4">Upcoming Events</h2>
+            <EventList 
+                events={upcomingEvents}
+                loading={loading}
+                error={errorMessage}
+            />
+        </div>
+
+        {(!loading && pastEvents.length > 0) && (
+            <div className="w-full mb-8">
+                <h2 className="text-2xl font-bold mb-4">Past & Attended Events</h2>
+                <EventList 
+                    events={pastEvents}
+                    loading={false}
+                    error={null}
+                />
+            </div>
+        )}
         
     </div>
   )
