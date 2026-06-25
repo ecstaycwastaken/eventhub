@@ -555,6 +555,18 @@ class EventController extends Controller
                 return response()->json(['message' => 'Invalid check-in code.'], 400);
             }
 
+            // Check if the event has already occurred (i.e., the event date is in the past)
+            $eventDate = Carbon::parse($event->date);
+            if ($eventDate->isPast()) {
+                return response()->json(['message' => 'Check-in is not allowed for past events.'], 400);
+            }
+
+            // Check if the date today is the same as the event date
+            $today = Carbon::now()->toDateString();
+            if ($today !== $event->date->toDateString()) {
+                return response()->json(['message' => 'Check-in is only allowed on the event date.'], 400);
+            }
+
             // Update the attendance status to 'attended'
             EventAttendance::where('event_id', $event_id)
                 ->where('user_id', $attendance->user_id)
