@@ -129,7 +129,7 @@ class AuthController extends Controller
                 secure: env('APP_ENV') === 'production', // Set to true if using HTTPS
                 httpOnly: true,
                 raw: false,
-                sameSite: 'Lax'
+                sameSite: env('APP_ENV') === 'production' ? 'None' : 'Lax'
             );
 
             $role = User::where('id', $supabaseUser['user']['id'])->value('role');
@@ -193,7 +193,7 @@ class AuthController extends Controller
                 secure: env('APP_ENV') === 'production', // Set to true if using HTTPS
                 httpOnly: true,
                 raw: false,
-                sameSite: 'Lax'
+                sameSite: env('APP_ENV') === 'production' ? 'None' : 'Lax'
             );
             return response()->json([
                 'message' => 'Successfully logged out!'
