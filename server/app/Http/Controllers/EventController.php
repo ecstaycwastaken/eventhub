@@ -348,20 +348,44 @@ class EventController extends Controller
     public function getMyEvents(Request $request) {
         try {
             $user = $request->user();
+            
+            // Optional query parameter to specify which columns to retrieve. Default to all columns if not provided.
+            $columns = $request->query('columns');
 
-            // Fetch the events created by the user along with their categories
-            $events = Event::where('user_id', $user->id)->with('category')->get();
+            // If columns are provided as a comma-separated string, convert it to an array
+            if (is_string($columns)) {
+                $columns = array_map('trim', explode(',', $columns));
+            }
+
+            if (!is_array($columns) || empty($columns)) {
+                $columns = ['id', 'title', 'description', 'date', 'venue', 'category_id', 'capacity', 'price', 'banner_image'];
+            } else {
+                // Force include essential keys for relationships to work
+                if (!in_array('id', $columns)) $columns[] = 'id';
+                if (!in_array('category_id', $columns)) $columns[] = 'category_id';
+                if (!in_array('user_id', $columns)) $columns[] = 'user_id'; 
+            }
+
+            // Fetch events hosted by the user along with their categories and attendee counts
+            $events = Event::select($columns)
+                ->where('user_id', $user->id)
+                ->with('category')
+                ->withCount(['eventAttendances as attendees_count' => function ($query) {
+                    $query->where('status', 'registered');
+                }])
+                ->get();
+
+            // Append host name to each event (the host is the current user)
             $events->each(function($event) {
                 $event->host_name = $event->getEventHost();
-                $event->attendees_count = $event->eventAttendances()->where('status', 'registered')->count();
             });
 
-            // Return success whether the user has events or not, along with the events data
             return response()->json([
-                'has_events' => !$events->isEmpty(),
+                'has_events' => $events->isNotEmpty(),
                 'events' => $events,
                 'total_events' => $events->count(),
             ]);
+
         } catch (\Exception $e) {
             Log::error('Error fetching my events: ' . $e->getMessage());
             return response()->json([
@@ -605,6 +629,8 @@ class EventController extends Controller
     public function getEventsReport(Request $request) {
         try {
             $user = $request->user();
+            // Optional query parameter for selecting a specific event
+            $query = $request->query('event_id', null);
 
             // Fetch the events hosted by the user along with their categories and registration counts
             $events = Event::whereHas('eventAttendances', function($query) use ($user) {
@@ -614,6 +640,9 @@ class EventController extends Controller
                 ->withCount(['eventAttendances as registrations_count' => function($query) {
                     $query->where('status', ['registered', 'attended']);
                 }])
+                ->when($query, function ($q) use ($query) {
+                    $q->where('id', $query);
+                })
                 ->get();
 
             // Calculate dashboard KPIs
