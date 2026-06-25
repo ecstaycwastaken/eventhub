@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { FiSearch, FiCheck } from "react-icons/fi";
 import { IoQrCode } from "react-icons/io5";
 import { toast } from "sonner";
-import Button from "@/components/Button"; 
 import type { AttendanceData } from "@/types/attendee";
 import { useHttp } from "@/hooks";
 import { Spinner } from "@/components/ui/spinner";
@@ -28,28 +27,24 @@ function CheckInPage() {
         });
     }, [fetchEvents]);
 
-    useEffect(() => {
-        if (eventsRes?.events && eventsRes.events.length > 0 && !selectedEventId) {
-            setSelectedEventId(eventsRes.events[0].id.toString());
-        }
-    }, [eventsRes, selectedEventId]);
+    const effectiveEventId = selectedEventId || (eventsRes?.events?.length ? eventsRes.events[0].id.toString() : "");
 
     useEffect(() => {
-        if (selectedEventId) {
+        if (effectiveEventId) {
             fetchAttendance({ 
                 method: 'GET', 
-                url: `/api/v1/event/attendance/${selectedEventId}` 
+                url: `/api/v1/event/attendance/${effectiveEventId}` 
             });
         }
-    }, [selectedEventId, fetchAttendance]);
+    }, [effectiveEventId, fetchAttendance]);
 
     const handleCheckIn = async (codeToUse: string) => {
-        if (!codeToUse || !selectedEventId) return;
+        if (!codeToUse || !effectiveEventId) return;
 
         try {
             const response = await checkInRequest({
                 method: 'POST',
-                url: `/api/v1/event/check-in?code=${codeToUse}&event_id=${selectedEventId}`
+                url: `/api/v1/event/check-in?code=${codeToUse}&event_id=${effectiveEventId}`
             });
 
             if (response) {
@@ -62,9 +57,10 @@ function CheckInPage() {
 
                 fetchAttendance({ 
                     method: 'GET', 
-                    url: `/api/v1/event/attendance/${selectedEventId}` 
+                    url: `/api/v1/event/attendance/${effectiveEventId}` 
                 });
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             toast.error("Failed to check in. Please verify the code.");
         }
@@ -95,8 +91,8 @@ function CheckInPage() {
                             <span>SELECT EVENT</span>
                             {loadingEvents && <Spinner size="xs" variant="muted" thickness={3} />}
                         </label>
-                       <select 
-                            value={selectedEventId}
+                        <select 
+                            value={effectiveEventId}
                             onChange={(e) => setSelectedEventId(e.target.value)}
                             disabled={loadingEvents || !eventsRes?.events?.length}
                             className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-800 text-caption-2 rounded-lg px-4 py-3 outline-none focus:border-gray-400 transition-colors appearance-none disabled:opacity-50"

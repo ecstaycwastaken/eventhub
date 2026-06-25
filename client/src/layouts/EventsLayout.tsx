@@ -14,7 +14,13 @@ function EventsLayout() {
     const [collapsed, setCollapsed] = useState(false);
   return (
     <div className="flex min-h-[calc(100vh-70px)] bg-[#F9FAFB] font-dm">
-      <Sidebar collapsed={collapsed} title="Host Dashboard" links={hostLinks} onToggle={() => setCollapsed(!collapsed)} />
+      <Sidebar 
+        collapsed={collapsed} 
+        title="Host Dashboard" 
+        links={hostLinks} 
+        onToggle={() => setCollapsed(!collapsed)} 
+        className="md:sticky md:top-[64px] md:h-[calc(100vh-64px)]"
+      />
 
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
 

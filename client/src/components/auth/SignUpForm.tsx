@@ -57,7 +57,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                 <h1 className="text-caption-3 text-black">USERNAME AND PASSWORD</h1>
                 <hr className="text-gray/50 mb-3" />
 
-                <label htmlFor="username" className="text-label text-gray mb-1">USERNAME</label>
+                <label htmlFor="username" className="text-label text-gray mb-1">USERNAME <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your username" 
                     type="text"
@@ -66,9 +66,9 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                     required 
                 />
 
-                <label htmlFor="password" className="text-label text-gray mb-1">PASSWORD</label>
+                <label htmlFor="password" className="text-label text-gray mb-1">PASSWORD <span className="text-red-500">*</span></label>
                 <div className="relative w-full mb-5">
-                    <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full" 
+                    <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full [&::-ms-reveal]:hidden [&::-ms-clear]:hidden" 
                         placeholder="Enter your password" 
                         type={showPassword ? 'text' : 'password'}  
                         name="password"
@@ -89,8 +89,8 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                     </button>
                 </div>
 
-                <label htmlFor="password_confirmation" className="text-label text-gray mb-1">RE-TYPE PASSWORD</label>
-                <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full" 
+                <label htmlFor="password_confirmation" className="text-label text-gray mb-1">RE-TYPE PASSWORD <span className="text-red-500">*</span></label>
+                <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full [&::-ms-reveal]:hidden [&::-ms-clear]:hidden" 
                     placeholder="Re-type your password" 
                     type={showPassword ? 'text' : 'password'}
                     name="password_confirmation"
@@ -101,7 +101,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                 <h1 className="text-caption-3 text-black mt-5">CONTACT INFORMATION</h1>
                 <hr className="text-gray/50 mb-3" />
 
-                <label htmlFor="email" className="text-label text-gray mb-1">EMAIL ADDRESS</label>
+                <label htmlFor="email" className="text-label text-gray mb-1">EMAIL ADDRESS <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your email address" 
                     type="email"
@@ -110,7 +110,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                     required 
                 />
 
-                <label htmlFor="country" className="text-label text-gray mb-1">COUNTRY</label>
+                <label htmlFor="country" className="text-label text-gray mb-1">COUNTRY <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your country of origin" 
                     type="text"
@@ -119,7 +119,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                     required 
                 />
 
-                <label htmlFor="contact_number" className="text-label text-gray mb-1">MOBILE PHONE</label>
+                <label htmlFor="contact_number" className="text-label text-gray mb-1">MOBILE PHONE <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your mobile number" 
                     type="text"
@@ -130,7 +130,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
 
                 <div className="flex gap-2">
                     <div className="flex-1">
-                        <label htmlFor="region" className="text-label text-gray mb-1">REGION</label>
+                        <label htmlFor="region" className="text-label text-gray mb-1">REGION <span className="text-red-500">*</span></label>
                         <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                             placeholder="" 
                             type="text"
@@ -140,7 +140,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                         />
                     </div>
                     <div className="flex-1">
-                        <label htmlFor="city" className="text-label text-gray mb-1">CITY</label>
+                        <label htmlFor="city" className="text-label text-gray mb-1">CITY <span className="text-red-500">*</span></label>
                         <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                             placeholder="" 
                             type="text"
@@ -155,7 +155,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                 <h1 className="text-caption-3 text-black">PERSONAL INFORMATION</h1>
                 <hr className="text-gray/50 mb-3" />
 
-                <label htmlFor="first_name" className="text-label text-gray mb-1">FIRST NAME</label>
+                <label htmlFor="first_name" className="text-label text-gray mb-1">FIRST NAME <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your first name" 
                     type="text"
@@ -164,7 +164,7 @@ function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
                     required 
                 />
 
-                <label htmlFor="last_name" className="text-label text-gray mb-1">LAST NAME</label>
+                <label htmlFor="last_name" className="text-label text-gray mb-1">LAST NAME <span className="text-red-500">*</span></label>
                 <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                     placeholder="Enter your last name" 
                     type="text"

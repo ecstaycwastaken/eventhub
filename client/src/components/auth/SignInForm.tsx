@@ -63,7 +63,7 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
                 </div>
             )}
 
-            <label htmlFor="email" className="text-label text-gray mb-1">EMAIL</label>
+            <label htmlFor="email" className="text-label text-gray mb-1">EMAIL <span className="text-red-500">*</span></label>
             <input className="border border-gray px-4 py-2.5 rounded-xl text-caption-3 w-full mb-5" 
                 placeholder="you@example.com" 
                 type="email"
@@ -72,9 +72,9 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
                 required 
             />
 
-            <label htmlFor="password" className="text-label text-gray mb-1">PASSWORD</label>
+            <label htmlFor="password" className="text-label text-gray mb-1">PASSWORD <span className="text-red-500">*</span></label>
             <div className="relative w-full mb-5">
-                <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full" 
+                <input className="border border-gray px-4 py-2.5 pr-12 rounded-xl text-caption-3 w-full [&::-ms-reveal]:hidden [&::-ms-clear]:hidden" 
                     placeholder="••••••••" 
                     type={showPassword ? 'text' : 'password'}  
                     name="password"
