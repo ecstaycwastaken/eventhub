@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import Button from "@/components/Button";
-import { Spinner } from "@/components/ui/spinner";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { useHttp } from "@/hooks/useHttp";
 import type { AuthResponse } from "@/types/response";
@@ -61,7 +60,7 @@ export default function AdminCreateUserModal({ isOpen, onClose, onSuccess }: Adm
                         alt="Background"
                         className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
                     
                     <Button
                         bgColorClass="bg-white/10"

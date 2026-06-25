@@ -126,7 +126,7 @@ class AuthController extends Controller
                 minutes: 60 * 24,
                 path: '/',
                 domain: null,
-                secure: false, // Set to true if using HTTPS
+                secure: env('APP_ENV') === 'production', // Set to true if using HTTPS
                 httpOnly: true,
                 raw: false,
                 sameSite: 'Lax'
@@ -190,7 +190,7 @@ class AuthController extends Controller
                 minutes: -1,
                 path: '/',
                 domain: null,
-                secure: false,
+                secure: env('APP_ENV') === 'production', // Set to true if using HTTPS
                 httpOnly: true,
                 raw: false,
                 sameSite: 'Lax'

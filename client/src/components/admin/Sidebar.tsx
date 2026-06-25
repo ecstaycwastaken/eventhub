@@ -2,6 +2,7 @@ import { FaCalendar, FaTags, FaUser, FaUserCheck } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
 import { FiMenu } from "react-icons/fi";
 import type { IconType } from "react-icons";
+import { IoMdArrowBack } from "react-icons/io";
 import SidebarLink from "./SidebarLink";
 
 export interface NavLinkItem {
@@ -40,7 +41,7 @@ function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLin
         )}
       </div>
 
-      <nav className="flex flex-col px-3 gap-2">
+      <nav className="flex flex-col px-3 gap-2 h-full">
         {links.map((link) => (
           <SidebarLink 
             key={link.path}
@@ -50,6 +51,14 @@ function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLin
             collapsed={collapsed}
           />
         ))}
+        <div className="mt-auto mb-4">
+          <SidebarLink
+            path="/u/events"
+            icon={IoMdArrowBack}
+            label="Return to EventHub"
+            collapsed={collapsed}
+          />
+        </div>
       </nav>
     </aside>
   )
