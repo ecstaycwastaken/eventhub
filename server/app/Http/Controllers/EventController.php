@@ -262,34 +262,34 @@ class EventController extends Controller
     /**
      * NOTE: To be adjusted, this method is currently not used.
      */
-    public function searchEvents(Request $request) {
-        try {
-            $query = $request->query('q', '');
+    // public function searchEvents(Request $request) {
+    //     try {
+    //         $query = $request->query('q', '');
 
-            // Search for events by title or description
-            $events = Event::where('title', 'ilike', "%{$query}%")
-                ->orWhere('description', 'ilike', "%{$query}%")
-                ->with('category')
-                ->get();
+    //         // Search for events by title or description
+    //         $events = Event::where('title', 'ilike', "%{$query}%")
+    //             ->orWhere('description', 'ilike', "%{$query}%")
+    //             ->with('category')
+    //             ->get();
 
-            $categories = $events->groupBy('category.name')->map(function ($group) {
-                return $group->count();
-            });
+    //         $categories = $events->groupBy('category.name')->map(function ($group) {
+    //             return $group->count();
+    //         });
 
-            return response()->json([
-                'has_events' => !$events->isEmpty(),
-                'events' => $events,
-                'total_events' => $events->count(),
-                'categories' => $categories
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error searching events: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An unexpected error occurred while searching events.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'has_events' => !$events->isEmpty(),
+    //             'events' => $events,
+    //             'total_events' => $events->count(),
+    //             'categories' => $categories
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error searching events: ' . $e->getMessage());
+    //         return response()->json([
+    //             'message' => 'An unexpected error occurred while searching events.',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Internal Server Error'
+    //         ], 500);
+    //     }
+    // }
 
     public function getAllEvents(Request $request) {
         try {
@@ -451,7 +451,7 @@ class EventController extends Controller
             }
 
             // Delete the attendance record to unregister the user
-            $attendance->delete();
+            EventAttendance::where('code', $attendance->code)->delete();
 
             return response()->json(['message' => 'Successfully unregistered from the event.']);
         } catch (\Exception $e) {
