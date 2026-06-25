@@ -19,8 +19,8 @@ Route::prefix('v1')->group(function () {
     
     Route::group(['prefix' => 'auth'], function () {
         // Public auth routes
-        Route::post('/signup', [AuthController::class, 'signup'])->name('auth.signup');
-        Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+        Route::post('/signup', [AuthController::class, 'signup'])->middleware('throttle:auth')->name('auth.signup');
+        Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth')->name('auth.login');
         
         // Protected auth routes
         Route::middleware(['supabase.auth'])->group(function () {

@@ -14,20 +14,20 @@ interface MyEventsTableProps {
     onRetry: () => void;
     onEdit: (id: string | number) => void;
     onDelete: (event: EventWithCategory) => void;
+    currentPage: number;
+    totalPages: number;
+    totalEvents: number;
+    rowsPerPage: number;
+    onPageChange: (page: number) => void;
 }
 
 function EventTable({
-    events, loading, error, errorMessage, searchQuery, onRetry, onEdit, onDelete
+    events, loading, error, errorMessage, searchQuery, onRetry, onEdit, onDelete,
+    currentPage, totalPages, totalEvents, rowsPerPage, onPageChange
 }: MyEventsTableProps) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const rows = 5;
+    const currentEvents = events;
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery]);
-
-    const totalPages = Math.ceil(events.length / rows) || 1;
-    const currentEvents = events.slice((currentPage - 1) * rows, currentPage * rows);
+    // totalPages and currentEvents handled by server
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-200">
@@ -129,31 +129,31 @@ function EventTable({
             </tbody>
         </table>
 
-        {!loading && !error && events.length > 0 && (
+        {!loading && !error && totalEvents > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white rounded-b-xl">
                 <p className="text-sm text-gray-500 font-medium">
-                    Showing <span className="font-bold text-gray-900">{((currentPage - 1) * rows) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * rows, events.length)}</span> of <span className="font-bold text-gray-900">{events.length}</span> results
+                    Showing <span className="font-bold text-gray-900">{((currentPage - 1) * rowsPerPage) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * rowsPerPage, totalEvents)}</span> of <span className="font-bold text-gray-900">{totalEvents}</span> results
                 </p>
                 <div className="flex items-center gap-3">
                     <Button 
                         bgColorClass="bg-transparent"
                         textColorClass="text-black"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        onClick={() => onPageChange(currentPage - 1)}
                         className="px-4 py-2 border border-gray-200 rounded-lg text-button-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={currentPage === 1}
+                        disabled={currentPage <= 1}
                     >
                         
                         Previous
                     </Button>
                     <span className="text-label text-gray-600 font-caption-2 px-2">
-                        Page {currentPage} of {totalPages}
+                        Page {currentPage} of {Math.max(1, totalPages)}
                     </span>
                     <Button 
                         bgColorClass="bg-transparent"
                         textColorClass="text-black"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        onClick={() => onPageChange(currentPage + 1)}
                         className="px-4 py-2 border border-gray-200 rounded-lg text-button-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage >= totalPages}
                     >
                         
                         Next

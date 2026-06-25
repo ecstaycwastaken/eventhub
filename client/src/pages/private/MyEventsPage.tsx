@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useHttp } from "@/hooks/useHttp";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
@@ -10,9 +10,11 @@ import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 import EventTable from "@/components/event-browser/EventTable";
 
 interface MyEventsResponse {
-    hasEvents: boolean;
+    has_events: boolean;
     events: EventWithCategory[];
     total_events: number;
+    current_page: number;
+    last_page: number;
 }
 
 function MyEventsPage() {
@@ -21,26 +23,28 @@ function MyEventsPage() {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+    const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
 
-    useEffect(() => {
+    const fetchEvents = useCallback(() => {
+        const query = searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : '';
         sendRequest({
             method: 'GET',
-            url: '/api/v1/event/my-events/'
-        })
-    }, [sendRequest]);
+            url: `/api/v1/event/my-events?page=${currentPage}&per_page=5${query}`
+        });
+    }, [searchQuery, currentPage, sendRequest]);
+
+    useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
 
     const eventsToShow = data?.events || [];
     const totalEvents = data?.total_events || 0;
     const errorMessage = error?.message || null;
 
-    const filteredEvents = eventsToShow.filter((event) => 
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.category.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setSearchQuery(val);
+        setCurrentPage(1);
         
         const newParams = new URLSearchParams(searchParams.toString());
         if (val.trim()) {
@@ -48,7 +52,15 @@ function MyEventsPage() {
         } else {
             newParams.delete('q');
         }
-        setSearchParams(newParams);
+        newParams.set('page', '1');
+        setSearchParams(newParams, { replace: true });
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        const newParams = new URLSearchParams(searchParams.toString());
+        newParams.set('page', newPage.toString());
+        setSearchParams(newParams, { replace: true });
     };
 
     const { sendRequest: deleteRequest, loading: isDeleting } = useHttp();
@@ -79,7 +91,7 @@ function MyEventsPage() {
                 setIsDeleteModalOpen(false);
                 setEventToDelete(null);
                 
-                sendRequest({ method: 'GET', url: '/api/v1/event/my-events/' });
+                fetchEvents();
             }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
@@ -117,14 +129,19 @@ function MyEventsPage() {
         </div>
 
         <EventTable 
-            events={filteredEvents}
+            events={eventsToShow}
             loading={loading}
             error={error}
             errorMessage={errorMessage}
             searchQuery={searchQuery}
-            onRetry={() => sendRequest({ method: 'GET', url: '/api/v1/event/my-events/' })}
+            onRetry={fetchEvents}
             onEdit={(id) => navigate(`/u/my-events/edit/${id}`)}
             onDelete={handleDeleteClick}
+            currentPage={data?.current_page || 1}
+            totalPages={data?.last_page || 1}
+            totalEvents={data?.total_events || 0}
+            rowsPerPage={5}
+            onPageChange={handlePageChange}
         />
 
         <DeleteConfirmationModal

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import Button from '@/components/Button';
 import logoImg from '@/assets/logo.png';
@@ -16,6 +16,24 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
 
   const displayName = user?.username || user?.first_name || 'User';
   const initial = displayName.charAt(0).toUpperCase();
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const onLogout = () => {
     logout();
@@ -66,7 +84,7 @@ const Navbar = ({ onOpenSignIn }: NavbarProps) => {
                 Sign in
               </Button> 
             ) : (
-              <div className='relative'>
+              <div className='relative' ref={dropdownRef}>
                 <div className='flex items-center gap-3 border border-gray-200 rounded-full 
                   p-1 pr-3 cursor-pointer hover:bg-gray-50 transition-colors'
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}  

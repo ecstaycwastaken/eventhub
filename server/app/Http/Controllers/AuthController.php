@@ -10,6 +10,21 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function signup(Request $request) {
+        $allowedEmailDomain = [
+            'gmail.com',
+            'yahoo.com',
+            'outlook.com',
+            'hotmail.com',
+            'icloud.com',
+            'aol.com',
+            'protonmail.com',
+            'zoho.com',
+            'gmx.com',
+            'mail.com',
+            'pup.edu.ph',
+            // Add more allowed email domains as needed
+        ];
+
         try {
             $request->validate([
                 'username' => 'required|string|unique:users',
@@ -29,6 +44,14 @@ class AuthController extends Controller
                 'email.unique' => 'The email address has already been registered.',
                 'password.confirmed' => 'The password confirmation does not match.'
             ]);
+
+            // Check if the email domain is allowed
+            $emailDomain = substr(strrchr($request->email, "@"), 1);
+            if (!in_array($emailDomain, $allowedEmailDomain)) {
+                return response()->json([
+                    'message' => 'The email domain is not allowed. Please use a valid email address.'
+                ], 400);
+            }
 
             // Confirm password and password confirmation match
             if ($request->password !== $request->password_confirmation) {
@@ -67,8 +90,8 @@ class AuthController extends Controller
                     $errorMessage = 'A user with this email address is already registered.';
                 }
                 return response()->json([
-                    'message' => 'Registration failed.',
-                    'error' => $errorMessage
+                    'message' => $errorMessage,
+                    'error' => 'Registration failed.'
                 ], $response->status() >= 400 && $response->status() < 500 ? $response->status() : 500);
             }
 
@@ -124,8 +147,8 @@ class AuthController extends Controller
                 $errorData = $response->json();
                 $errorMessage = $errorData['error_description'] ?? 'Invalid email or password.';
                 return response()->json([
-                    'message' => 'Authentication failed.',
-                    'error' => $errorMessage
+                    'message' => $errorMessage,
+                    'error' => 'Authentication failed.'
                 ], 401);
             }
 
