@@ -24,7 +24,18 @@ class AuthController extends Controller
                 'password_confirmation' => 'required|string',
                 'profile_image' => 'nullable|string',
                 'role' => 'nullable|string|in:user,admin'
+            ], [
+                'username.unique' => 'The username has already been taken.',
+                'email.unique' => 'The email address has already been registered.',
+                'password.confirmed' => 'The password confirmation does not match.'
             ]);
+
+            // Confirm password and password confirmation match
+            if ($request->password !== $request->password_confirmation) {
+                return response()->json([
+                    'message' => 'Password and password confirmation do not match.'
+                ], 400);
+            }
 
             // Create user using Supabase Auth API
             $response = Http::withHeaders([
