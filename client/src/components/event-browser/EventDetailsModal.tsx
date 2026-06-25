@@ -9,6 +9,7 @@ import { useHttp } from '@/hooks/useHttp';
 import { toast } from 'sonner';
 import ViewPassModal from './ViewPassModal';
 import { IoQrCode } from "react-icons/io5";
+import DeleteConfirmationModal from '../ui/DeleteConfirmationModal';
 
 interface EventDetailsModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const { sendRequest: unregisterRequest, loading: isCancelling } = useHttp();
     
     const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
     const price = Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`;
     const date = new Date(event.date);
@@ -65,18 +67,21 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
         }
     };
 
-    const handleCancelRSVP = async () => {
-        if (window.confirm(`Are you sure you want to cancel your RSVP for ${event.title}?`)) {
-            try {
-                await unregisterRequest({
-                    method: 'DELETE',
-                    url: `/api/v1/event/registered-events/${event.id}`
-                });
-                toast.success("RSVP cancelled successfully.");
-                window.location.reload();
-            } catch (err: any) {
-                toast.error(err.message || "Failed to cancel RSVP.");
-            }
+    const handleCancelRSVPClick = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const confirmCancelRSVP = async () => {
+        try {
+            await unregisterRequest({
+                method: 'DELETE',
+                url: `/api/v1/event/registered-events/${event.id}`
+            });
+            toast.success("RSVP cancelled successfully.");
+            window.location.reload();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to cancel RSVP.");
+            setIsCancelModalOpen(false);
         }
     };
 
@@ -125,8 +130,10 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             <div className="flex flex-col bg-[#F9FAFB] p-4 rounded-2xl border border-[#F3F4F6]">
                                 <p className="text-sub-1 font-bold text-gray-500 tracking-wider mb-1">DATE & TIME</p>
-                                <p className="font-bold text-gray-900 text-heading-3">{formattedDate}</p>
-                                <p className="text-gray-500 text-sub-2 mt-auto">{formattedTime}</p>
+                                <div className="flex-1 flex items-center">
+                                    <p className="font-bold text-gray-900 text-heading-3">{formattedDate}</p>
+                                </div>
+                                <p className="text-gray-500 text-sub-2">{formattedTime}</p>
                             </div>
                             <div className="bg-[#F9FAFB] p-4 rounded-2xl border border-[#F3F4F6]">
                                 <p className="text-sub-1 font-bold text-gray-500 tracking-wider mb-1">VENUE</p>
@@ -179,7 +186,7 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                                 <Button
                                     bgColorClass="bg-white" textColorClass="text-black"
                                     className="flex-1 flex justify-center items-center text-button-lg rounded-2xl py-3 border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
-                                    onClick={handleCancelRSVP}
+                                    onClick={handleCancelRSVPClick}
                                     disabled={isCancelling}
                                 >
                                     Cancel My Pass
@@ -202,6 +209,15 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
                 isOpen={isPassModalOpen} 
                 onClose={() => setIsPassModalOpen(false)} 
                 event={event} 
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isCancelModalOpen}
+                title="Cancel RSVP"
+                description={`Are you sure you want to cancel your registration for "${event.title}"?`}
+                isDeleting={isCancelling}
+                onCancel={() => setIsCancelModalOpen(false)}
+                onConfirm={confirmCancelRSVP}
             />
         </>
     )

@@ -15,8 +15,19 @@ interface ViewPassModalProps {
     event: EventWithCategory;
 }
 
+interface EventPassResponse {
+    event_pass: {
+        event_id: string | number;
+        user_id: string | number;
+        status: string;
+        code: string;
+        qr_data: string;
+        event: EventWithCategory;
+    }
+}
+
 export default function ViewPassModal({ isOpen, onClose, event }: ViewPassModalProps) {
-    const { data, loading, sendRequest } = useHttp<{ event_pass: any }>();
+    const { data, loading, sendRequest } = useHttp<EventPassResponse>();
 
     useEffect(() => {
         if (isOpen) {
