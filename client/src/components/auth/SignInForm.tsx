@@ -94,8 +94,9 @@ function SignInForm({ onClose }: { onClose?: () => void }) {
                     )}
                 </button>
             </div>
-
-            <a href="#" className="self-end text-label text-gray mb-5">Forgot Password?</a>
+            
+            {/* TODO: Implement Forgot Password functionality */}
+            {/* <a href="#" className="self-end text-label text-gray mb-5">Forgot Password?</a> */}
 
             <Button
                 bgColorClass="bg-brand-red"

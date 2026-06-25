@@ -20,7 +20,7 @@ interface EventDetailsModalProps {
 function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, isAuthenticated } = useAuth();
 
     const { sendRequest: registerRequest, loading: isRegistering } = useHttp();
     const { sendRequest: unregisterRequest, loading: isCancelling } = useHttp();
@@ -48,6 +48,12 @@ function EventDetailsModal({ isOpen, onClose, event }: EventDetailsModalProps) {
     }, [isFromAdminRoute, event.id, navigate]);
 
     const handleRSVP = async () => {
+        if (!isAuthenticated) {
+            onClose();
+            window.dispatchEvent(new Event('open-auth-modal'));
+            return;
+        }
+
         try {
             const response = await registerRequest({
                 method: 'POST',

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
@@ -10,13 +10,19 @@ function LandingLayout() {
   const [authTab, setAuthTab] = useState<'signin'>('signin')
   const { isAuthenticated } = useAuth()
 
-  if (isAuthenticated) {
-    return <Navigate to='/u/events' replace />
-  }
-
   const openAuthModal = (tab: 'signin') => {
     setAuthTab(tab)
     setIsAuthModalOpen(true)
+  }
+
+  useEffect(() => {
+    const handleOpenAuth = () => openAuthModal('signin');
+    window.addEventListener('open-auth-modal', handleOpenAuth);
+    return () => window.removeEventListener('open-auth-modal', handleOpenAuth);
+  }, []);
+
+  if (isAuthenticated) {
+    return <Navigate to='/u/events' replace />
   }
 
   return (
