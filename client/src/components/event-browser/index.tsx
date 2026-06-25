@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useHttp } from '@/hooks/useHttp';
 import { EventCategories } from './EventCategories';
@@ -45,45 +45,107 @@ export default function EventBrowser({
     }
   });
 
-  const [fetchedData, setFetchedData] = useState<{ key: string; data: EventWithCategory[] } | null>(null);
-
   const category = searchParams.get('category')?.toLowerCase() || null;
   const q = searchParams.get('q') || null;
-  const cacheKey = `eventhub_events_${category || 'all'}_${q || ''}`;
 
-  const eventsToShow = useMemo(() => {
-    if (fetchedData && fetchedData.key === cacheKey) {
-      return fetchedData.data;
-    }
-    try {
-      const cached = sessionStorage.getItem(cacheKey);
-      return cached ? JSON.parse(cached) : [];
-    } catch (e) {
-      console.error('Failed to parse cached events:', e);
-      return [];
-    }
-  }, [fetchedData, cacheKey]);
+  const [events, setEvents] = useState<EventWithCategory[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const fetchIdRef = useRef(0);
+  
+  const loadingRef = useRef(false);
+  const paginationRef = useRef({ hasMore, nextCursor });
 
   useEffect(() => {
+    loadingRef.current = getAllEventsLoading || isFetchingNextPage;
+  }, [getAllEventsLoading, isFetchingNextPage]);
+
+  useEffect(() => {
+    paginationRef.current = { hasMore, nextCursor };
+  }, [hasMore, nextCursor]);
+
+  const fetchEvents = useCallback(async (cursor: string | null = null) => {
+    const currentFetchId = ++fetchIdRef.current;
+    
+    if (!cursor) {
+      setEvents([]);
+      setNextCursor(null);
+      setHasMore(true);
+      setIsInitialLoad(true);
+    }
+
     const params = new URLSearchParams();
     if (category) params.set('category', category);
     if (q) params.set('q', q);
+    if (cursor) params.set('cursor', cursor);
 
-    getAllEvents({
-      method: 'GET',
-      url: `/api/v1/event?${params.toString()}`,
-    }).then((response) => {
+    if (cursor) setIsFetchingNextPage(true);
+
+    try {
+      const response = await getAllEvents({
+        method: 'GET',
+        url: `/api/v1/event?${params.toString()}`,
+      });
+
+      if (currentFetchId !== fetchIdRef.current) return;
+
       if (response && response.data) {
-        const fetchedEvents = Array.isArray(response.data) 
-          ? response.data 
-          : (response.data.events || []);
-        sessionStorage.setItem(cacheKey, JSON.stringify(fetchedEvents));
-        setFetchedData({ key: cacheKey, data: fetchedEvents });
+        const fetchedEvents = response.data.events || [];
+        
+        if (cursor) {
+          setEvents(prev => [...prev, ...fetchedEvents]);
+        } else {
+          setEvents(fetchedEvents);
+        }
+
+        setNextCursor(response.data.pagination?.next_cursor || null);
+        setHasMore(response.data.pagination?.has_more ?? false);
       }
-    }).catch((err) => {
+    } catch (err) {
+      if (currentFetchId !== fetchIdRef.current) return;
       console.error("Failed to load events:", err);
-    });
-  }, [getAllEvents, category, q, cacheKey]);
+    } finally {
+      if (currentFetchId === fetchIdRef.current) {
+        if (cursor) {
+          setIsFetchingNextPage(false);
+        } else {
+          setIsInitialLoad(false);
+        }
+      }
+    }
+  }, [getAllEvents, category, q]);
+
+  useEffect(() => {
+    const loadInitialEvents = async () => {
+      await fetchEvents(null);
+    };
+    loadInitialEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingRef.current && paginationRef.current.hasMore) {
+          fetchEvents(paginationRef.current.nextCursor);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [fetchEvents]);
 
   useEffect(() => {
     if (categoriesData.length > 0) return;
@@ -101,7 +163,7 @@ export default function EventBrowser({
     });
   }, [getAllCategories, categoriesData.length]);
 
-  const totalEvents = eventsToShow.length;
+  const totalEvents = events.length;
   
   const categories: Category[] = useMemo(() => {
     const defaultCategories: Category[] = [
@@ -137,7 +199,12 @@ export default function EventBrowser({
             setSearchParams={setSearchParams}
           />
         )}
-        <EventList events={eventsToShow} loading={getAllEventsLoading} error={getAllEventsError?.message || null} />
+        <EventList events={events} loading={isInitialLoad || (getAllEventsLoading && !isFetchingNextPage)} error={getAllEventsError?.message || null} />
+        {hasMore && (
+          <div ref={loadMoreRef} className="w-full h-10 flex items-center justify-center mt-4">
+            {isFetchingNextPage && <span className="text-gray-500 font-medium">Loading more events...</span>}
+          </div>
+        )}
         <EventFooter />
       </div>
     </section>

@@ -17,6 +17,8 @@ function EventCard({ event }: EventCardProps) {
   const { user } = useAuth();
   const isOwner = user?.id === event.user_id;
   const isAdmin = user?.role === 'admin';
+  const isInAdminPath = window.location.pathname.startsWith('/admin');
+  const viewingAsAdmin = isAdmin && isInAdminPath;
 
   const price =
     Number(event.price) === 0 ? 'Free' : `₱${Number(event.price).toLocaleString()}`
@@ -44,7 +46,7 @@ function EventCard({ event }: EventCardProps) {
             className="h-full w-full object-cover"
           />
 
-          {isOwner || isAdmin ? (
+          {isOwner || viewingAsAdmin ? (
             <div className="absolute right-3 top-3 rounded-full bg-success-bg px-4 py-2 text-sm font-semibold text-success-text">
               Published
             </div>
@@ -76,7 +78,7 @@ function EventCard({ event }: EventCardProps) {
             </p>
 
             <div className="mt-auto pt-2">
-              {isOwner || isAdmin ? (
+              {isOwner || viewingAsAdmin ? (
                 <Button
                   bgColorClass="bg-transparent"
                   textColorClass="text-black"
