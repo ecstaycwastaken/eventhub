@@ -1,30 +1,55 @@
 import { FaCalendar, FaTags, FaUser, FaUserCheck } from "react-icons/fa";
 import { FaChartSimple } from "react-icons/fa6";
+import { FiMenu } from "react-icons/fi";
+import type { IconType } from "react-icons";
 import SidebarLink from "./SidebarLink";
 
-interface SidebarProps {
-  collapsed: boolean,
+export interface NavLinkItem {
+  label: string;
+  path: string;
+  icon: IconType;
 }
 
-function Sidebar({ collapsed }: SidebarProps) {
+interface SidebarProps {
+  collapsed: boolean;
+  title?: string;
+  links?: NavLinkItem[];
+  onToggle?: () => void;
+}
+
+const defaultAdminLinks: NavLinkItem[] = [
+  { label: "Dashboard", path: "/admin", icon: FaChartSimple },
+  { label: "Events", path: "/admin/events", icon: FaCalendar },
+  { label: "Users", path: "/admin/users", icon: FaUser },
+  { label: "Attendances", path: "/admin/attendances", icon: FaUserCheck },
+  { label: "Categories", path: "/admin/categories", icon: FaTags },
+];
+
+function Sidebar({ collapsed, title = "Admin Dashboard", links = defaultAdminLinks, onToggle }: SidebarProps) {
   return (
-    <aside className={`fixed left-0 top-0 border-r border-border bg-bg-page h-screen transition-all duration-300 flex flex-col z-20 ${collapsed ? "w-20" : "w-64"}`}>
-      <div className="flex items-center justify-center h-16 border-b border-border mb-4">
-        {!collapsed ? 
-          <h1 className="text-lg font-medium">Admin Dashboard</h1>
-          :
-          <div className="flex items-center justify-center h-7 w-7 bg-brand-red rounded-sm text-white">
-            <p>A</p>
-          </div>
-        }
+    <aside className={`sticky left-0 top-0 border-r border-border bg-bg-page h-[calc(100vh-70px)] transition-all duration-300 flex flex-col z-20 ${collapsed ? "w-18" : "w-64"}`}>
+      <div className="flex items-center h-16 border-b border-border px-5 mb-4 gap-4">
+        {onToggle && (
+            <button onClick={onToggle} className="text-gray-500 hover:text-black transition-colors shrink-0">
+                <FiMenu size={20} />
+            </button>
+        )}
+        
+        {!collapsed && (
+          <h1 className="text-lg font-bold text-gray-900 truncate">{title}</h1>
+        )}
       </div>
 
       <nav className="flex flex-col px-3 gap-2">
-        <SidebarLink path="/admin" icon={FaChartSimple} label="Dashboard" collapsed={collapsed} />
-        <SidebarLink path="/admin/events" icon={FaCalendar} label="Events" collapsed={collapsed} />
-        <SidebarLink path="/admin/users" icon={FaUser} label="Users" collapsed={collapsed} />
-        <SidebarLink path="/admin/attendances" icon={FaUserCheck} label="Attendances" collapsed={collapsed} />
-        <SidebarLink path="/admin/categories" icon={FaTags} label="Categories" collapsed={collapsed} />
+        {links.map((link) => (
+          <SidebarLink 
+            key={link.path}
+            path={link.path}
+            icon={link.icon}
+            label={link.label}
+            collapsed={collapsed}
+          />
+        ))}
       </nav>
     </aside>
   )

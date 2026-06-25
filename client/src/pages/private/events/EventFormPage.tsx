@@ -33,7 +33,7 @@ function EventFormPage() {
                     bgColorClass="bg-transparent"
                     textColorClass="text-black"
                     className="flex items-center gap-2 text-button-sm"
-                    onClick={() => navigate('/home/my-events')}
+                    onClick={() => navigate('/u/my-events')}
                 >
                     <FaArrowLeft size={20} /> Back to My Events
                 </Button>

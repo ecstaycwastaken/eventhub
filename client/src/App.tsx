@@ -12,17 +12,20 @@ import AuthProvider from "@/context/auth/AuthProvider";
 import LandingLayout from "@/layouts/LandingLayout"
 import AdminLayout from "./layouts/AdminLayout";
 import HomeLayout from "./layouts/HomeLayout";
-
+import EventsLayout from "./layouts/EventsLayout";
 
 import LandingPage from "@/pages/public/LandingPage"
 import UnauthorizedPage from "@/pages/public/UnauthorizedPage"
 import NotFoundPage from "@/pages/public/NotFoundPage"
 
 import HomePage from "@/pages/private/HomePage";
-import EventFormPage from "@/pages/private/EventFormPage";
+import EventFormPage from "@/pages/private/events/EventFormPage";
 import MyRegistrationsPage from "@/pages/private/MyRegistrationsPage";
 import MyEventsPage from "@/pages/private/MyEventsPage";
-import EditMyEventPage from "@/pages/private/EditMyEventPage";
+import EditMyEventPage from "@/pages/private/events/EditMyEventPage";
+import CheckInPage from "@/pages/private/events/CheckInPage";
+import ReportsPage from "@/pages/private/events/ReportsPage";
+
 
 import { 
   AdminAttendancesPage,
@@ -48,7 +51,13 @@ const router = createBrowserRouter(
         <Route element={<HomeLayout />}>
           <Route path='events' element={<HomePage />} />
           <Route path='my-registrations' element={<MyRegistrationsPage />} />
-          <Route path='my-events' element={<MyEventsPage />} />
+
+          <Route path='my-events' element={<EventsLayout />}>
+            <Route index element={<MyEventsPage />} />
+            <Route path='check-in' element={<CheckInPage />} />
+            <Route path='reports' element={<ReportsPage />} />
+          </Route>
+          
           <Route path='my-events/create-event' element={<EventFormPage />} />
           <Route path='my-events/edit/:id' element={<EditMyEventPage />} />
         </Route>
