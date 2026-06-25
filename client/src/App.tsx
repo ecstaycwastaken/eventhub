@@ -14,6 +14,7 @@ import AuthGuard from "@/components/auth/AuthGuard"
 import AuthProvider from "@/context/auth/AuthProvider";
 
 import LandingLayout from "@/layouts/LandingLayout"
+import PublicLayout from "@/layouts/PublicLayout"
 import AdminLayout from "./layouts/AdminLayout";
 import HomeLayout from "./layouts/HomeLayout";
 import EventsLayout from "./layouts/EventsLayout";
@@ -21,6 +22,9 @@ import EventsLayout from "./layouts/EventsLayout";
 const LandingPage = lazy(() => import("@/pages/public/LandingPage"));
 const UnauthorizedPage = lazy(() => import("@/pages/public/UnauthorizedPage"));
 const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"));
+const AboutPage = lazy(() => import("@/pages/public/AboutPage"));
+const ContactPage = lazy(() => import("@/pages/public/ContactPage"));
+const PrivacyPage = lazy(() => import("@/pages/public/PrivacyPage"));
 
 const HomePage = lazy(() => import("@/pages/private/HomePage"));
 const EventFormPage = lazy(() => import("@/pages/private/events/EventFormPage"));
@@ -55,6 +59,12 @@ const router = createBrowserRouter(
       {/* Public Routes */}
       <Route path='/' element={<LandingLayout />}>
         <Route index element={<LandingPage />} />
+      </Route>
+
+      <Route element={<PublicLayout />}>
+        <Route path='/about' element={<AboutPage />} />
+        <Route path='/contact' element={<ContactPage />} />
+        <Route path='/privacy' element={<PrivacyPage />} />
       </Route>
 
       <Route path='/unauthorized' element={<UnauthorizedPage />} />
