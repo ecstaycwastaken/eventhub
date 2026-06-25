@@ -5,6 +5,7 @@ export interface ErrorMessage {
     message?: string;
     code?: string;
     suggestion?: string;
+    validationErrors?: Record<string, string[]>;
 }
 
 export function useHttp<T>() {
@@ -41,13 +42,21 @@ export function useHttp<T>() {
                 console.log("Request Error:", err);
                 if (axios.isAxiosError(err)) {
                     console.error("Axios Error Response:", err.response);
-                    const errorMessage = err.response?.data?.error || "An error occurred during the request.";
+                    const responseData = err.response?.data;
+                    
+                    let errorMessage = responseData?.message || responseData?.error || "An error occurred during the request.";
+                    const validationErrors = responseData?.errors;
+
+                    if (validationErrors && Object.keys(validationErrors).length > 0 && !responseData?.message) {
+                        errorMessage = Object.values(validationErrors).flat()[0] as string;
+                    }
+
                     const suggestion = 
-                        err.response?.data?.suggestion 
-                        || err.response?.data?.error?.suggestion
+                        responseData?.suggestion 
+                        || responseData?.error?.suggestion
                         || "Please try again later.";
 
-                    setError({ message: errorMessage, suggestion });
+                    setError({ message: errorMessage, suggestion, validationErrors });
                 }
                 throw err;
             } finally {
